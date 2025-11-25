@@ -29,3 +29,11 @@ export interface SelectOption {
         [key: string]: any;
     };
 }
+
+type RichTextEditorInputProps = {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    className?: string;
+    disabled?: boolean;
+};
