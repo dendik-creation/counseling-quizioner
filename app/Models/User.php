@@ -21,5 +21,5 @@ class User extends Authenticatable
     // Roles
     const int ROLE_ADMIN = 1;
     const int ROLE_MGBK = 2;
-    const int ROLE_GURU_BK = 3;
+    const int ROLE_COUNSELING_TEACHER = 3;
 }

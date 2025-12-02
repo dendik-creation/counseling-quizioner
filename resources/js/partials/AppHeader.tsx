@@ -11,18 +11,19 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SignoutMenu from "@/components/custom/SignoutMenu";
+import { humanizeLevelAsRole } from "@/components/helper/helper";
 interface AppHeaderProps {
     classNames?: string;
     name: string;
-    role: string;
+    level: string;
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ classNames, name, role }) => {
+const AppHeader: React.FC<AppHeaderProps> = ({ classNames, name, level }) => {
     return (
         <header
             className={cn(
                 "w-full h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 shadow-sm",
-                classNames
+                classNames,
             )}
         >
             <div className="flex items-center gap-4">
@@ -34,7 +35,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ classNames, name, role }) => {
                         <div className="flex text-sm flex-col justify-center items-end">
                             <span className="">{name}</span>
                             <span className="text-xs font-semibold">
-                                {role}
+                                {humanizeLevelAsRole(level.toString())}
                             </span>
                         </div>
                         <Avatar className="border-2 border-solid transition-all border-yellow-500">

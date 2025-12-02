@@ -8,20 +8,35 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import sidebarNavs from "@/lib/sidebar_navs";
+import { sidebarNavs } from "@/lib/sidebar_navs";
 import { Link } from "@inertiajs/react";
 import { ArrowBigRightDash } from "lucide-react";
 
+const matchRoleToNavs = (role: string) => {
+    switch (role) {
+        case "1":
+            return sidebarNavs.adminNavs;
+        case "2":
+            return sidebarNavs.mgbkNavs;
+        case "3":
+            return sidebarNavs.counselingTeacherNavs;
+        default:
+            return sidebarNavs.mgbkNavs;
+    }
+};
+
 export default function AppSidebar({ role }: { role: string }) {
     const pathname = window.location.pathname;
-    const items = sidebarNavs;
+    const items = matchRoleToNavs(role);
     return (
         <Sidebar>
             <SidebarContent className="bg-amber-200 min-h-full relative h-full flex flex-col">
                 <SidebarHeader className="mt-3 ms-3 gap-0">
-                    <span className="text-black/80 font-bold">App Name</span>
+                    <span className="text-black/80 font-bold">
+                        My Konseling
+                    </span>
                     <span className="text-black/60 text-sm font-normal">
-                        App Description
+                        Sistem manajemen informasi kuisioner konseling
                     </span>
                 </SidebarHeader>
                 <SidebarGroup>

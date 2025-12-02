@@ -19,7 +19,6 @@ export const useInertiaShared = () => {
 
 export default function AppLayout({ children, className }: AppLayoutProps) {
     const { flash } = useInertiaShared();
-
     useEffect(() => {
         if (flash?.success) {
             BlastToaster("success", flash?.success);
@@ -32,11 +31,11 @@ export default function AppLayout({ children, className }: AppLayoutProps) {
         <SidebarProvider>
             <Toaster position={"bottom-right"} />
             <div className={`flex min-h-screen w-full ${className}`}>
-                <AppSidebar role={flash?.user?.role as string} />
+                <AppSidebar role={flash?.user?.level?.toString()} />
                 <div className="flex flex-col w-full">
                     <AppHeader
                         name={flash?.user?.name}
-                        role={flash?.user?.role}
+                        level={flash?.user?.level}
                     />
                     <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">
                         {children}

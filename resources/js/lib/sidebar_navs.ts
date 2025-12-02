@@ -1,4 +1,4 @@
-import { Grid2X2, LucideProps } from "lucide-react";
+import { Grid2X2, LucideProps, Users } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type NavItems = {
@@ -10,13 +10,46 @@ export type NavItems = {
     >;
 }[];
 
-const sidebarNavs: NavItems = [
+const adminNavs: NavItems = [
     {
         type: "item",
         title: "Dashboard",
-        url: "/dashboard",
+        url: "/admin/dashboard",
+        icon: Grid2X2,
+    },
+    {
+        type: "splitter",
+        title: "Data Master",
+        url: "#",
+    },
+    {
+        type: "item",
+        title: "Data User",
+        url: "/admin/users",
+        icon: Users,
+    },
+];
+
+const mgbkNavs: NavItems = [
+    {
+        type: "item",
+        title: "Dashboard",
+        url: "/mgbk/dashboard",
         icon: Grid2X2,
     },
 ];
 
-export default sidebarNavs;
+const counselingTeacherNavs: NavItems = [
+    {
+        type: "item",
+        title: "Dashboard",
+        url: "/teacher/dashboard",
+        icon: Grid2X2,
+    },
+];
+
+export const sidebarNavs = {
+    adminNavs,
+    mgbkNavs,
+    counselingTeacherNavs,
+};

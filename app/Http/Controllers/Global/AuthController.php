@@ -12,6 +12,16 @@ use Inertia\Inertia;
 
 class AuthController extends Controller
 {
+    private function redirectDashboardByLevel($level)
+    {
+        return match ($level) {
+            User::ROLE_ADMIN => "/admin/dashboard",
+            User::ROLE_MGBK => "/mgbk/dashboard",
+            User::ROLE_COUNSELING_TEACHER => "/counseling/dashboard",
+            default => "/dashboard",
+        };
+    }
+
     public function signedInStatus(Request $request)
     {
         $auth = Auth::user();
@@ -19,7 +29,8 @@ class AuthController extends Controller
             return Inertia::location("/auth/signin");
         }
         Session::flash("success", "Login berhasil");
-        return Inertia::location("/dashboard");
+        $redirect_url = $this->redirectDashboardByLevel($auth->level);
+        return Inertia::location($redirect_url);
     }
 
     public function signInView()
