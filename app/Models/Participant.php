@@ -10,9 +10,6 @@ class Participant extends Model
 
     public function origin()
     {
-        return $this->belongsTo(
-            ParticipantOrigin::class,
-            "participant_origin_id",
-        );
+        return $this->belongsTo(ParticipantOrigin::class, "origin_id");
     }
 }

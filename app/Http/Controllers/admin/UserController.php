@@ -54,7 +54,35 @@ class UserController extends Controller
         return Inertia::location(route("admin.users.index"));
     }
 
-    public function update(Request $request, $id) {}
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        if (!$user) {
+            Session::flash("error", "User tidak ditemukan");
+            return Inertia::location(route("admin.users.index"));
+        }
 
-    public function destroy($id) {}
+        $validated = $request->validate([
+            "name" => "required|max:255",
+            "username" => "required|max:255|unique:users,username," . $user->id,
+            "level" => "required",
+        ]);
+
+        $user->update($validated);
+        Session::flash("success", "User berhasil diperbarui.");
+        return Inertia::location(route("admin.users.index"));
+    }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        if (!$user) {
+            Session::flash("error", "User tidak ditemukan");
+            return Inertia::location(route("admin.users.index"));
+        }
+
+        $user->delete();
+        Session::flash("success", "User berhasil dihapus.");
+        return Inertia::location(route("admin.users.index"));
+    }
 }

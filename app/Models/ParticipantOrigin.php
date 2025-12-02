@@ -10,6 +10,6 @@ class ParticipantOrigin extends Model
 
     public function participants()
     {
-        return $this->hasMany(Participant::class);
+        return $this->hasMany(Participant::class, "origin_id");
     }
 }

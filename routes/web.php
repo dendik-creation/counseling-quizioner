@@ -33,9 +33,62 @@ Route::prefix("admin")
         ])->name("admin.dashboard.index");
 
         // Master users
-        Route::resource("users", AdminUserController::class);
+        Route::prefix("users")
+            ->name("admin.users.")
+            ->group(function () {
+                Route::get("/", [AdminUserController::class, "index"])->name(
+                    "index",
+                );
+                Route::post("/", [AdminUserController::class, "store"])->name(
+                    "store",
+                );
+                Route::put("/{id}", [
+                    AdminUserController::class,
+                    "update",
+                ])->name("update");
+                Route::delete("/{id}", [
+                    AdminUserController::class,
+                    "destroy",
+                ])->name("destroy");
+            });
         // Master participant origin
-        Route::resource("origins", AdminOriginController::class);
+        Route::prefix("origins")
+            ->name("admin.origins.")
+            ->group(function () {
+                Route::get("/", [AdminOriginController::class, "index"])->name(
+                    "index",
+                );
+                Route::post("/", [AdminOriginController::class, "store"])->name(
+                    "store",
+                );
+                Route::put("/{id}", [
+                    AdminOriginController::class,
+                    "update",
+                ])->name("update");
+                Route::delete("/{id}", [
+                    AdminOriginController::class,
+                    "destroy",
+                ])->name("destroy");
+            });
         // Master participant
-        Route::resource("participants", AdminParticipantController::class);
+        Route::prefix("participants")
+            ->name("admin.participants.")
+            ->group(function () {
+                Route::get("/", [
+                    AdminParticipantController::class,
+                    "index",
+                ])->name("index");
+                Route::post("/", [
+                    AdminParticipantController::class,
+                    "store",
+                ])->name("store");
+                Route::put("/{id}", [
+                    AdminParticipantController::class,
+                    "update",
+                ])->name("update");
+                Route::delete("/{id}", [
+                    AdminParticipantController::class,
+                    "destroy",
+                ])->name("destroy");
+            });
     });

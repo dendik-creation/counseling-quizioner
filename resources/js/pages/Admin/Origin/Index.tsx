@@ -1,24 +1,7 @@
-import {
-    PaginatorBuilder,
-    SearchInput,
-    SelectSearchInput,
-} from "@/components/custom/FormElement";
-import {
-    humanizeLevelAsRole,
-    inputDebounce,
-    ymdToIdDate,
-} from "@/components/helper/helper";
+import { PaginatorBuilder, SearchInput } from "@/components/custom/FormElement";
 import AppLayout from "@/partials/AppLayout";
 import { PageTitle } from "@/Partials/PageTitle";
-import { AdminUserIndexProps } from "@/types/user";
-import { router, useForm } from "@inertiajs/react";
-import { useEffect, useRef } from "react";
-import AdminUserCreate from "./ModalCreate";
-import AdminUserEdit from "./ModalEdit";
-import AdminUserModalResetPassword from "./ModalResetPassword";
-import ConfirmDialog from "@/components/custom/ConfirmDialog";
-import EmptyTable from "@/components/custom/EmptyTable";
-import { Button } from "@/components/ui/button";
+import { AdminOriginIndexProps } from "@/types/origin";
 import {
     Table,
     TableBody,
@@ -27,19 +10,25 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useEffect, useRef } from "react";
+import { router, useForm } from "@inertiajs/react";
+import { humanizeOriginType, inputDebounce } from "@/components/helper/helper";
+import ConfirmDialog from "@/components/custom/ConfirmDialog";
+import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import EmptyTable from "@/components/custom/EmptyTable";
+import AdminOriginEdit from "./ModalEdit";
+import AdminOriginCreate from "./ModalCreate";
 
-const AdminUserIndex = ({
+const AdminOriginIndex = ({
     title,
     description,
-    users,
+    origins,
     search,
-    level,
-}: AdminUserIndexProps) => {
+}: AdminOriginIndexProps) => {
     const firstRender = useRef(true);
     const { data: filterData, setData: setFilterData } = useForm({
         search: search || "",
-        level: level || "",
     });
     const handleFilter = (key: keyof typeof filterData, value: string) => {
         setFilterData(key, value);
@@ -47,24 +36,23 @@ const AdminUserIndex = ({
 
     const debounceSearch = inputDebounce((data: typeof filterData) => {
         router.get(
-            "/admin/users",
+            "/admin/origins",
             {
                 search: data.search,
-                level: data.level,
             },
             {
                 preserveState: true,
                 replace: true,
-                only: ["users"],
+                only: ["origins"],
             },
         );
     });
 
     const handleDelete = (id: number) => {
-        router.delete(`/admin/users/${id}`, {
+        router.delete(`/admin/origins/${id}`, {
             preserveScroll: true,
             replace: true,
-            only: ["users"],
+            only: ["origins"],
         });
     };
 
@@ -86,33 +74,8 @@ const AdminUserIndex = ({
                         onChange={(e) => handleFilter("search", e.target.value)}
                         value={filterData.search || ""}
                     />
-                    <div className="">
-                        <SelectSearchInput
-                            className="w-full"
-                            placeholder="Pilih Role"
-                            value={filterData.level.toString() || ""}
-                            options={[
-                                {
-                                    label: "Admin",
-                                    value: "1",
-                                },
-                                {
-                                    label: "MGBK",
-                                    value: "2",
-                                },
-                                {
-                                    label: "Guru BK",
-                                    value: "3",
-                                },
-                            ]}
-                            onChange={(value) =>
-                                handleFilter("level", value.toString())
-                            }
-                            removeValue={() => handleFilter("level", "")}
-                        />
-                    </div>
                 </div>
-                <AdminUserCreate />
+                <AdminOriginCreate />
             </div>
 
             <div className="rounded-md border">
@@ -123,16 +86,13 @@ const AdminUserIndex = ({
                                 #
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Username
-                            </TableHead>
-                            <TableHead className="bg-stone-200 font-semibold">
                                 Nama
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Role
+                                Tipe
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Bergabung sejak
+                                Jumlah Partisipan
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Aksi
@@ -140,23 +100,19 @@ const AdminUserIndex = ({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {users.data.map((user, index) => (
-                            <TableRow key={user.id}>
+                        {origins.data.map((origin, index) => (
+                            <TableRow key={origin.id}>
                                 <TableCell>{index + 1}</TableCell>
-                                <TableCell>{user.username}</TableCell>
-                                <TableCell>{user.name}</TableCell>
+                                <TableCell>{origin.name}</TableCell>
                                 <TableCell>
-                                    {humanizeLevelAsRole(user.level.toString())}
+                                    {humanizeOriginType(origin.type)}
                                 </TableCell>
                                 <TableCell>
-                                    {ymdToIdDate(user.created_at)}
+                                    {origin?.participant_count || "-"}
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <AdminUserEdit user={user} />
-                                        <AdminUserModalResetPassword
-                                            id={user.id}
-                                        />
+                                        <AdminOriginEdit origin={origin} />
                                         <ConfirmDialog
                                             triggerNode={
                                                 <span>
@@ -168,32 +124,38 @@ const AdminUserIndex = ({
                                                     </Button>
                                                 </span>
                                             }
-                                            title="Hapus User"
-                                            description="Menghapus user menyebabkan kehilangan akses terhadap sistem. Apakah anda yakin ?"
+                                            title="Hapus asal partisipan"
+                                            description="Menghapus asal partisipan menyebabkan hilangnya asal setiap partisipan. Apakah anda yakin ?"
                                             type="danger"
                                             confirmAction={() =>
-                                                handleDelete(user.id as number)
+                                                handleDelete(
+                                                    origin.id as number,
+                                                )
                                             }
                                         />
                                     </div>
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {users.data.length == 0 && (
-                            <EmptyTable colSpan={6} message="User tidak ada" />
+                        {origins.data.length == 0 && (
+                            <EmptyTable
+                                colSpan={4}
+                                message="Asal partisipan tidak ada"
+                            />
                         )}
                     </TableBody>
                 </Table>
             </div>
-            {users.total > users.per_page && (
+            {origins.total > origins.per_page && (
                 <PaginatorBuilder
-                    prevUrl={users.prev_page_url ?? "#"}
-                    nextUrl={users.next_page_url ?? "#"}
-                    currentPage={users.current_page}
-                    totalPage={users.last_page}
+                    prevUrl={origins.prev_page_url ?? "#"}
+                    nextUrl={origins.next_page_url ?? "#"}
+                    currentPage={origins.current_page}
+                    totalPage={origins.last_page}
                 />
             )}
         </AppLayout>
     );
 };
-export default AdminUserIndex;
+
+export default AdminOriginIndex;

@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create("participants", function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("origin_id");
+            $table->unsignedBigInteger("origin_id")->nullable();
             $table->string("unique_value");
             $table->string("name");
             $table->string("class")->nullable(); // For students
@@ -22,7 +22,7 @@ return new class extends Migration {
                 ->foreign("origin_id")
                 ->references("id")
                 ->on("participant_origins")
-                ->onDelete("cascade");
+                ->nullOnDelete();
         });
     }
 

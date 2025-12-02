@@ -1,4 +1,4 @@
-import { Grid2X2, LucideProps, Users } from "lucide-react";
+import { Earth, Grid2X2, LucideProps, Users } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type NavItems = {
@@ -27,6 +27,12 @@ const adminNavs: NavItems = [
         title: "Data User",
         url: "/admin/users",
         icon: Users,
+    },
+    {
+        type: "item",
+        title: "Data Asal",
+        url: "/admin/origins",
+        icon: Earth,
     },
 ];
 

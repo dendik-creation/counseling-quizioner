@@ -128,3 +128,16 @@ export const humanizeLevelAsRole = (level: string) => {
             return "User";
     }
 };
+
+export const humanizeOriginType = (type: string) => {
+    switch (type) {
+        case "SCHOOL":
+            return "Sekolah";
+        case "COMMUNITY":
+            return "Komunitas";
+        case "COMMON":
+            return "Masyarakat Umum";
+        default:
+            return "Lainnya";
+    }
+};
