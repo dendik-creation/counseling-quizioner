@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
@@ -27,6 +28,7 @@ class UserController extends Controller
             ->when($level, function ($query, $level) {
                 return $query->where("level", $level);
             })
+            ->whereNot("id", Auth::user()->id)
             ->orderBy("name", "asc")
             ->paginate(config("custom.default.pagination"));
         return Inertia::render("Admin/User/Index", [
@@ -70,6 +72,26 @@ class UserController extends Controller
 
         $user->update($validated);
         Session::flash("success", "User berhasil diperbarui.");
+        return Inertia::location(route("admin.users.index"));
+    }
+
+    public function resetPassword($id, Request $request)
+    {
+        $user = User::findOrFail($id);
+        if (!$user) {
+            Session::flash("error", "User tidak ditemukan");
+            return Inertia::location(route("admin.users.index"));
+        }
+
+        $validated = $request->validate([
+            "password" => "required",
+        ]);
+
+        $user->update([
+            "password" => Hash::make($validated["password"]),
+        ]);
+
+        Session::flash("success", "Password user berhasil direset");
         return Inertia::location(route("admin.users.index"));
     }
 

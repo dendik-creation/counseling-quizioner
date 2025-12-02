@@ -46,6 +46,10 @@ Route::prefix("admin")
                     AdminUserController::class,
                     "update",
                 ])->name("update");
+                Route::put("/{id}/reset-password", [
+                    AdminUserController::class,
+                    "resetPassword",
+                ])->name("admin.users.reset-password");
                 Route::delete("/{id}", [
                     AdminUserController::class,
                     "destroy",
