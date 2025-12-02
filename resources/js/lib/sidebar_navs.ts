@@ -1,4 +1,4 @@
-import { Earth, Grid2X2, LucideProps, Users } from "lucide-react";
+import { BookUser, Earth, Grid2X2, LucideProps, Users } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type NavItems = {
@@ -33,6 +33,12 @@ const adminNavs: NavItems = [
         title: "Data Asal",
         url: "/admin/origins",
         icon: Earth,
+    },
+    {
+        type: "item",
+        title: "Data Partisipan",
+        url: "/admin/participants",
+        icon: BookUser,
     },
 ];
 

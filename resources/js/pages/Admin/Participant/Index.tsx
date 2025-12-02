@@ -1,7 +1,14 @@
-import { PaginatorBuilder, SearchInput } from "@/components/custom/FormElement";
+import {
+    PaginatorBuilder,
+    SearchInput,
+    SelectSearchInput,
+} from "@/components/custom/FormElement";
+import { inputDebounce } from "@/components/helper/helper";
 import AppLayout from "@/partials/AppLayout";
 import { PageTitle } from "@/Partials/PageTitle";
-import { AdminOriginIndexProps } from "@/types/origin";
+import { AdminParticipantIndexProps } from "@/types/participant";
+import { router, useForm } from "@inertiajs/react";
+import { useEffect, useRef } from "react";
 import {
     Table,
     TableBody,
@@ -10,25 +17,24 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { useEffect, useRef } from "react";
-import { Link, router, useForm } from "@inertiajs/react";
-import { humanizeOriginType, inputDebounce } from "@/components/helper/helper";
 import ConfirmDialog from "@/components/custom/ConfirmDialog";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import EmptyTable from "@/components/custom/EmptyTable";
-import AdminOriginEdit from "./ModalEdit";
-import AdminOriginCreate from "./ModalCreate";
+import AdminParticipantEdit from "./ModalEdit";
 
-const AdminOriginIndex = ({
+const AdminParticipantIndex = ({
     title,
     description,
+    participants,
     origins,
+    origin,
     search,
-}: AdminOriginIndexProps) => {
+}: AdminParticipantIndexProps) => {
     const firstRender = useRef(true);
     const { data: filterData, setData: setFilterData } = useForm({
         search: search || "",
+        origin: origin || "",
     });
     const handleFilter = (key: keyof typeof filterData, value: string) => {
         setFilterData(key, value);
@@ -36,23 +42,24 @@ const AdminOriginIndex = ({
 
     const debounceSearch = inputDebounce((data: typeof filterData) => {
         router.get(
-            "/admin/origins",
+            "/admin/participants",
             {
                 search: data.search,
+                origin: data.origin,
             },
             {
                 preserveState: true,
                 replace: true,
-                only: ["origins"],
+                only: ["participants"],
             },
         );
     });
 
     const handleDelete = (id: number) => {
-        router.delete(`/admin/origins/${id}`, {
+        router.delete(`/admin/participants/${id}`, {
             preserveScroll: true,
             replace: true,
-            only: ["origins"],
+            only: ["participants"],
         });
     };
 
@@ -69,13 +76,23 @@ const AdminOriginIndex = ({
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2 w-full">
                     <SearchInput
-                        placeholder={`Cari berdasarkan nama`}
+                        placeholder={`Cari berdasarkan nama, kelas, pekerjaan`}
                         className="lg:max-w-sm w-full"
                         onChange={(e) => handleFilter("search", e.target.value)}
                         value={filterData.search || ""}
                     />
+                    <div className="">
+                        <SelectSearchInput
+                            placeholder="Pilih Tipe Asal"
+                            options={origins}
+                            value={filterData.origin || ""}
+                            onChange={(value) =>
+                                handleFilter("origin", value.toString())
+                            }
+                            removeValue={() => handleFilter("origin", "")}
+                        />
+                    </div>
                 </div>
-                <AdminOriginCreate />
             </div>
 
             <div className="rounded-md border">
@@ -86,13 +103,19 @@ const AdminOriginIndex = ({
                                 #
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
+                                ID Unik
+                            </TableHead>
+                            <TableHead className="bg-stone-200 font-semibold">
                                 Nama
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Tipe
+                                Asal Partisipan
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Jumlah Partisipan
+                                Kelas
+                            </TableHead>
+                            <TableHead className="bg-stone-200 font-semibold">
+                                Pekerjaan
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Aksi
@@ -100,29 +123,24 @@ const AdminOriginIndex = ({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {origins.data.map((origin, index) => (
-                            <TableRow key={origin.id}>
+                        {participants.data.map((participant, index) => (
+                            <TableRow key={participant.id}>
                                 <TableCell>{index + 1}</TableCell>
-                                <TableCell>{origin.name}</TableCell>
+                                <TableCell>{participant.unique_code}</TableCell>
+                                <TableCell>{participant.name}</TableCell>
+                                <TableCell>{participant.origin.name}</TableCell>
                                 <TableCell>
-                                    {humanizeOriginType(origin.type)}
+                                    {participant?.class || "-"}
                                 </TableCell>
                                 <TableCell>
-                                    <Link
-                                        href={`/admin/participants?origin=${origin.id}`}
-                                    >
-                                        <Button variant={"outline"}>
-                                            <Eye />
-                                            <span>
-                                                Lihat (
-                                                {origin.participant_count || 0})
-                                            </span>
-                                        </Button>
-                                    </Link>
+                                    {participant?.work || "-"}
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <AdminOriginEdit origin={origin} />
+                                        <AdminParticipantEdit
+                                            participant={participant}
+                                            origins={origins}
+                                        />
                                         <ConfirmDialog
                                             triggerNode={
                                                 <span>
@@ -134,12 +152,12 @@ const AdminOriginIndex = ({
                                                     </Button>
                                                 </span>
                                             }
-                                            title="Hapus asal partisipan"
-                                            description="Menghapus asal partisipan menyebabkan hilangnya asal setiap partisipan. Apakah anda yakin ?"
+                                            title="Hapus partisipan"
+                                            description="Menghapus partisipan menyebabkan hilangnya jejak kuisioner yang telah dikerjalan. Apakah anda yakin ?"
                                             type="danger"
                                             confirmAction={() =>
                                                 handleDelete(
-                                                    origin.id as number,
+                                                    participant.id as number,
                                                 )
                                             }
                                         />
@@ -147,25 +165,25 @@ const AdminOriginIndex = ({
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {origins.data.length == 0 && (
+                        {participants.data.length == 0 && (
                             <EmptyTable
-                                colSpan={5}
-                                message="Asal partisipan tidak ada"
+                                colSpan={7}
+                                message="Partisipan tidak ada"
                             />
                         )}
                     </TableBody>
                 </Table>
             </div>
-            {origins.total > origins.per_page && (
+            {participants.total > participants.per_page && (
                 <PaginatorBuilder
-                    prevUrl={origins.prev_page_url ?? "#"}
-                    nextUrl={origins.next_page_url ?? "#"}
-                    currentPage={origins.current_page}
-                    totalPage={origins.last_page}
+                    prevUrl={participants.prev_page_url ?? "#"}
+                    nextUrl={participants.next_page_url ?? "#"}
+                    currentPage={participants.current_page}
+                    totalPage={participants.last_page}
                 />
             )}
         </AppLayout>
     );
 };
 
-export default AdminOriginIndex;
+export default AdminParticipantIndex;

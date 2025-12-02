@@ -74,9 +74,9 @@ const AdminUserEdit = ({ user }: { user: User }) => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-7xl">
                 <DialogHeader>
-                    <DialogTitle>Tambah User</DialogTitle>
+                    <DialogTitle>Edit User</DialogTitle>
                     <DialogDescription className="mb-3">
-                        Silakan isi data user baru
+                        Silakan perbarui data user pada form di bawah ini.
                     </DialogDescription>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                         <div className="flex flex-col w-full">

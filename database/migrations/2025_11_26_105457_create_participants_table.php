@@ -13,10 +13,10 @@ return new class extends Migration {
         Schema::create("participants", function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("origin_id")->nullable();
-            $table->string("unique_value");
+            $table->string("unique_code"); // nis/nisn for students, id number for common
             $table->string("name");
             $table->string("class")->nullable(); // For students
-            $table->string("position")->nullable(); // For Common
+            $table->string("work")->nullable(); // For Common
             $table->timestamps();
             $table
                 ->foreign("origin_id")

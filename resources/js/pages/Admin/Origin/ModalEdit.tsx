@@ -14,7 +14,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { ParticipantOrigin } from "@/types/origin";
 import { useForm } from "@inertiajs/react";
-import { CircleFadingPlus, CircleX, Dices, Loader, Save } from "lucide-react";
+import {
+    CircleFadingPlus,
+    CircleX,
+    Dices,
+    Loader,
+    Pencil,
+    Save,
+} from "lucide-react";
 import React from "react";
 
 const AdminOriginEdit = ({ origin }: { origin: ParticipantOrigin }) => {
@@ -63,16 +70,15 @@ const AdminOriginEdit = ({ origin }: { origin: ParticipantOrigin }) => {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant={"yellow"}>
-                    <CircleFadingPlus />
-                    <span>Tambah Asal</span>
+                <Button size={"icon"} variant={"blue"}>
+                    <Pencil />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-7xl">
                 <DialogHeader>
-                    <DialogTitle>Tambah Asal</DialogTitle>
+                    <DialogTitle>Edit Asal</DialogTitle>
                     <DialogDescription className="mb-3">
-                        Silakan isi data asal baru
+                        Silakan perbarui informasi asal partisipan di bawah ini.
                     </DialogDescription>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                         <div className="flex flex-col w-full">

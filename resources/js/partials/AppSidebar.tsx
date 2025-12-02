@@ -30,12 +30,12 @@ export default function AppSidebar({ role }: { role: string }) {
     const items = matchRoleToNavs(role);
     return (
         <Sidebar>
-            <SidebarContent className="bg-amber-200 min-h-full relative h-full flex flex-col">
+            <SidebarContent className="bg-stone-700 min-h-full relative h-full flex flex-col">
                 <SidebarHeader className="mt-3 ms-3 gap-0">
-                    <span className="text-black/80 font-bold">
+                    <span className="text-white/80 font-bold">
                         My Konseling
                     </span>
-                    <span className="text-black/60 text-sm font-normal">
+                    <span className="text-white/60 text-sm font-normal">
                         Sistem manajemen informasi kuisioner konseling
                     </span>
                 </SidebarHeader>
@@ -46,12 +46,12 @@ export default function AppSidebar({ role }: { role: string }) {
                                 if (item.type === "splitter") {
                                     return (
                                         <SidebarMenuItem
-                                            className="border-b border-slate-700 mt-2"
+                                            className="border-b border-white/20 mt-2"
                                             key={item.title}
                                         >
                                             <SidebarMenuButton
                                                 disabled
-                                                className="text-black uppercase text-xs"
+                                                className="text-white uppercase text-xs"
                                             >
                                                 <ArrowBigRightDash />
                                                 {item.title}
@@ -62,7 +62,7 @@ export default function AppSidebar({ role }: { role: string }) {
                                     const Icon = item.icon;
                                     return (
                                         <SidebarMenuItem
-                                            className="text-black/80 transition-all mb-0.5"
+                                            className="text-white/80 transition-all mb-0.5"
                                             key={item.title}
                                         >
                                             <SidebarMenuButton
