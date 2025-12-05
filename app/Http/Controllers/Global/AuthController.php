@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\global;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
+use Inertia\Inertia;
+use App\Models\Participant;
 use Illuminate\Http\Request;
+use App\Models\Questionnaire;
+use App\Models\ParticipantOrigin;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-use Inertia\Inertia;
 
 class AuthController extends Controller
 {
@@ -75,5 +78,50 @@ class AuthController extends Controller
             Session::flash("success", "Logout berhasil");
         }
         return Inertia::location("/auth/signin");
+    }
+
+    public function registerView()
+    {
+        if (session('participant_id')) {
+            return redirect()->route('guide');
+        }
+
+        $participantOrigin = ParticipantOrigin::all();
+        $participantOrigin = $participantOrigin->map(function ($origin) {
+            return [
+                'value' => $origin->id,
+                'label' => $origin->name
+            ];
+        });
+        return Inertia::render("Auth/Registration", ["app_name" => 'Register', 'participantOrigin' => $participantOrigin]);
+    }
+
+    public function registerStore(Request $request)
+    {
+        $data = $request->validate([
+            "name" => "required",
+            "unique_code" => "required",
+            "origin_id" => "required|exists:participant_origins,id",
+            "token" => "required",
+        ]);
+
+        $questionnaires = Questionnaire::where("access_token", $request->token)->where("expires_at", ">=", now())->first();
+        if (!$questionnaires) {
+            return back()->withErrors([
+                "message" => "Token tidak ditemukan / expired",
+            ]);
+        }
+
+        $participant = Participant::create($data);
+        session(['token' => $request->token, 'participant_id' => $participant->id, 'questionnaires_id' => $questionnaires->id]);
+
+        Session::flash('success', 'Registrasi berhasil');
+        return Inertia::location('/guide');
+    }
+
+    public function unregisterStore()
+    {
+        session()->forget(['answers', 'participant_id']);
+        return Inertia::location('/');
     }
 }

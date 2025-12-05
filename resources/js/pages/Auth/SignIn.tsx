@@ -1,4 +1,4 @@
-import { useForm, usePage } from "@inertiajs/react";
+import { useForm, usePage, router } from "@inertiajs/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,7 @@ import {
 import { ErrorInput } from "@/components/custom/FormElement";
 import { Toaster } from "react-hot-toast";
 import BlastToaster from "@/components/custom/BlastToaster";
-import { Key, Loader, LogIn, User } from "lucide-react";
+import { FilePen, Key, Loader, LogIn, User } from "lucide-react";
 import { useEffect } from "react";
 
 export default function SignIn({ app_name }: { app_name: string }) {
@@ -42,6 +42,10 @@ export default function SignIn({ app_name }: { app_name: string }) {
                 return BlastToaster("error", error.message);
             },
         });
+    };
+
+    const handleRegister = () => {
+        router.get(`/auth/register`);
     };
 
     return (
@@ -129,6 +133,17 @@ export default function SignIn({ app_name }: { app_name: string }) {
                                         <LogIn />
                                     </span>
                                 )}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant={"blue"}
+                                className="w-full p-6"
+                                onClick={handleRegister}
+                            >
+                                <span className="flex items-center gap-2">
+                                    <span>Registrasi</span>
+                                    <FilePen />
+                                </span>
                             </Button>
                         </form>
                     </CardContent>

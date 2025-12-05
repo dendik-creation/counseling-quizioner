@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 // Global Controllers
-use App\Http\Controllers\global\DashboardController;
 use App\Http\Controllers\global\AuthController;
+use App\Http\Controllers\Answer\QuestionnairesController;
 // Admin Controllers
+use App\Http\Controllers\global\DashboardController;
+use App\Http\Controllers\admin\ParticipantController;
 use App\Http\Controllers\admin\UserController as AdminUserController;
 use App\Http\Controllers\admin\OriginController as AdminOriginController;
 use App\Http\Controllers\admin\ParticipantController as AdminParticipantController;
@@ -18,7 +20,19 @@ Route::prefix("auth")->group(function () {
     Route::post("/signin", [AuthController::class, "signIn"])
         ->middleware("guest")
         ->name("auth.signin.store");
+
+    //Register
+    Route::get("/register", [AuthController::class, "registerView"])
+        ->name("auth.register.index")
+        ->middleware("guest");
+    Route::post("/register", [AuthController::class, "registerStore"])
+        ->name("auth.register.store")
+        ->middleware("guest");
+    Route::post("/unregister", [AuthController::class, "unregisterStore"])
+        ->name("auth.unregister.store")
+        ->middleware("guest");
 });
+
 Route::post("/auth/signout", [AuthController::class, "signOut"])
     ->middleware("auth")
     ->name("auth.signout.store");
@@ -96,3 +110,13 @@ Route::prefix("admin")
                 ])->name("destroy");
             });
     });
+
+// Kuisonair Routes
+Route::middleware(['participant', 'answering'])->group(function () {
+    Route::get('/guide', [QuestionnairesController::class, 'guide'])->name('guide');
+
+    Route::middleware(['answering'])->group(function () {
+        Route::get('/questionnaire/in-progress', [QuestionnairesController::class, 'answerIndex']);
+        Route::post('/questionnaire/in-progress', [QuestionnairesController::class, 'answerStore']);
+    });
+});

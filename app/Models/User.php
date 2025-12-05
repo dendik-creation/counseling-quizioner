@@ -19,7 +19,7 @@ class User extends Authenticatable
         ];
     }
     // Roles
-    const int ROLE_ADMIN = 1;
-    const int ROLE_MGBK = 2;
-    const int ROLE_COUNSELING_TEACHER = 3;
+    const ROLE_ADMIN = 1;
+    const ROLE_MGBK = 2;
+    const ROLE_COUNSELING_TEACHER = 3;
 }
