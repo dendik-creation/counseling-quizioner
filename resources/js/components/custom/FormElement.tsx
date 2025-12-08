@@ -1,5 +1,5 @@
 import { TriangleAlert, Search, CircleX, CalendarIcon } from "lucide-react";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,7 @@ import { SelectOption } from "@/types/global";
 import { ymdToIdDate } from "../helper/helper";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import axios from "axios";
 
 registerPlugin(FilePondPluginFileValidateType);
 
@@ -747,22 +748,349 @@ export const PaginatorBuilder = ({
     );
 };
 
-export const RichTextEditorInput = ({
-    value,
+// export const RichTextEditorInput = ({
+//     value,
+//     onChange,
+//     placeholder = "Tulis sesuatu...",
+//     className,
+//     disabled = false,
+// }: RichTextEditorInputProps) => {
+//     return (
+//         <div className={className}>
+//             <ReactQuill
+//                 value={value}
+//                 onChange={onChange}
+//                 placeholder={placeholder}
+//                 readOnly={disabled}
+//                 theme="snow"
+//             />
+//         </div>
+//     );
+// };
+
+export function RichTextEditorInput({
+    content,
+    height = 200,
     onChange,
-    placeholder = "Tulis sesuatu...",
-    className,
-    disabled = false,
-}: RichTextEditorInputProps) => {
+}: {
+    content: string;
+    height?: number;
+    onChange?: (value: string) => void;
+}) {
+    const quillRef = useRef<ReactQuill>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [previousContent, setPreviousContent] = useState(content);
+
+    // Update previous content when content prop changes
+    React.useEffect(() => {
+        setPreviousContent(content);
+    }, [content]);
+
+    // Custom image handler
+    const imageHandler = React.useCallback(() => {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/*");
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Ukuran gambar terlalu besar (maksimal 5MB)");
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith("image/")) {
+                alert("File harus berupa gambar");
+                return;
+            }
+
+            try {
+                setIsUploading(true);
+
+                // Convert file to base64
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    try {
+                        const base64 = reader.result as string;
+
+                        // Upload to server
+                        const response = await axios.post(
+                            "/questionnaire/upload-image",
+                            {
+                                image: base64,
+                                filename: `questionnaire_${Date.now()}`,
+                            }
+                        );
+
+                        if (response.data?.success) {
+                            const quill = quillRef.current?.getEditor();
+                            if (quill) {
+                                const range = quill.getSelection();
+                                const index = range
+                                    ? range.index
+                                    : quill.getLength();
+
+                                // Insert image with server URL
+                                quill.insertEmbed(
+                                    index,
+                                    "image",
+                                    response.data.url
+                                );
+                                quill.setSelection(index + 1, 0);
+                            }
+                        } else {
+                            alert(
+                                "Gagal mengupload gambar: " +
+                                    (response.data?.message || "Unknown error")
+                            );
+                        }
+                    } catch (error: any) {
+                        console.error("Upload error:", error);
+                        const errorMessage =
+                            error.response?.data?.message ||
+                            error.message ||
+                            "Unknown error";
+                        alert("Gagal mengupload gambar: " + errorMessage);
+                    } finally {
+                        setIsUploading(false);
+                    }
+                };
+
+                reader.onerror = () => {
+                    alert("Gagal membaca file gambar");
+                    setIsUploading(false);
+                };
+
+                reader.readAsDataURL(file);
+            } catch (error: any) {
+                console.error("File read error:", error);
+                alert("Gagal membaca file gambar");
+                setIsUploading(false);
+            }
+        };
+    }, []);
+
+    // Extract image URLs from HTML content
+    const extractImageUrls = React.useCallback((html: string): string[] => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const images = doc.querySelectorAll("img");
+        return Array.from(images)
+            .map((img) => img.src)
+            .filter(
+                (src) => src && src.includes("/assets/questionnaire_imgs/")
+            );
+    }, []);
+
+    // Handle content change and detect image deletions
+    const handleContentChange = React.useCallback(
+        async (newContent: string, delta: any, source: string, editor: any) => {
+            if (source === "user") {
+                // Compare previous content with new content to find deleted images
+                const previousImages = extractImageUrls(previousContent || "");
+                const currentImages = extractImageUrls(newContent || "");
+
+                // Find deleted images
+                const deletedImages = previousImages.filter(
+                    (url) => !currentImages.includes(url)
+                );
+
+                // Delete images from server (don't await to avoid blocking the UI)
+                deletedImages.forEach(async (imageUrl) => {
+                    try {
+                        await axios.post("/questionnaire/delete-image", {
+                            src: imageUrl,
+                        });
+                    } catch (error) {
+                        console.error(
+                            "Failed to delete image from server:",
+                            imageUrl,
+                            error
+                        );
+                        // Silently fail - the image will remain on server but that's acceptable
+                    }
+                });
+
+                // Update previous content
+                setPreviousContent(newContent);
+            }
+
+            // Call the original onChange callback
+            if (onChange) {
+                onChange(newContent);
+            }
+        },
+        [previousContent, onChange, extractImageUrls]
+    );
+
+    // Handle key events for better deletion detection
+    const handleKeyDown = React.useCallback((event: KeyboardEvent) => {
+        if (event.key === "Backspace" || event.key === "Delete") {
+            const quill = quillRef.current?.getEditor();
+            if (quill) {
+                const selection = quill.getSelection();
+                if (selection) {
+                    const [blot] = quill.getLeaf(selection.index);
+
+                    // Check if we're about to delete an image
+                    if (
+                        blot &&
+                        blot.parent &&
+                        blot.parent.domNode.tagName === "IMG"
+                    ) {
+                        const imgElement = blot.parent
+                            .domNode as HTMLImageElement;
+                        const imgSrc = imgElement.src;
+
+                        // Schedule deletion after the content changes
+                        setTimeout(async () => {
+                            if (
+                                imgSrc &&
+                                imgSrc.includes("/assets/questionnaire_imgs/")
+                            ) {
+                                try {
+                                    await axios.delete(
+                                        "/questionnaire/delete-image",
+                                        {
+                                            data: { src: imgSrc },
+                                        }
+                                    );
+                                } catch (error) {
+                                    console.error(
+                                        "Failed to delete image from server:",
+                                        imgSrc,
+                                        error
+                                    );
+                                    // Silently fail - the image will remain on server but that's acceptable
+                                }
+                            }
+                        }, 100);
+                    }
+                }
+            }
+        }
+    }, []);
+
+    // Attach keydown listener to quill editor
+    React.useEffect(() => {
+        const quill = quillRef.current?.getEditor();
+        if (quill) {
+            const editorElement = quill.root;
+            editorElement.addEventListener("keydown", handleKeyDown);
+
+            return () => {
+                editorElement.removeEventListener("keydown", handleKeyDown);
+            };
+        }
+    }, [handleKeyDown]);
+
+    const modules = React.useMemo(
+        () => ({
+            toolbar: {
+                container: [
+                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                    ["bold", "italic", "underline", "strike"],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    ["blockquote", "code-block"],
+                    ["link", "image"],
+                    [{ align: [] }],
+                    [{ color: [] }, { background: [] }],
+                    ["clean"],
+                ],
+                handlers: {
+                    image: imageHandler,
+                },
+            },
+        }),
+        [imageHandler]
+    );
+
+    const formats = React.useMemo(
+        () => [
+            "header",
+            "font",
+            "size",
+            "bold",
+            "italic",
+            "underline",
+            "strike",
+            "blockquote",
+            "list",
+            "bullet",
+            "indent",
+            "link",
+            "image",
+            "color",
+            "background",
+            "align",
+            "code-block",
+        ],
+        []
+    );
+
+    const editorStyles = React.useMemo(
+        () => ({
+            minHeight: `${height}px`,
+        }),
+        [height]
+    );
+
+    const quillStyles = React.useMemo(
+        () => ({
+            height: "100%",
+            display: "flex",
+            flexDirection: "column" as const,
+        }),
+        []
+    );
+
     return (
-        <div className={className}>
+        <div
+            className="rounded-md border overflow-hidden relative"
+            style={editorStyles}
+        >
             <ReactQuill
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-                readOnly={disabled}
+                ref={quillRef}
                 theme="snow"
+                value={content || ""}
+                onChange={handleContentChange}
+                modules={modules}
+                formats={formats}
+                className="bg-white"
+                style={quillStyles}
+                key={`rich-editor-${height}`}
+            />
+            {isUploading && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-4 rounded-lg flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <span>Mengupload gambar...</span>
+                    </div>
+                </div>
+            )}
+            <style
+                dangerouslySetInnerHTML={{
+                    __html: `
+                    .ql-container {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .ql-editor {
+                        flex: 1;
+                        height: auto !important;
+                        min-height: ${height - 45}px;
+                        max-height: ${height - 45}px;
+                        overflow-y: auto;
+                    }
+                `,
+                }}
             />
         </div>
     );
-};
+}

@@ -12,7 +12,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-
 class AuthController extends Controller
 {
     private function redirectDashboardByLevel($level)
@@ -24,7 +23,6 @@ class AuthController extends Controller
             default => "/dashboard",
         };
     }
-
     public function signedInStatus(Request $request)
     {
         $auth = Auth::user();
@@ -35,14 +33,12 @@ class AuthController extends Controller
         $redirect_url = $this->redirectDashboardByLevel($auth->level);
         return Inertia::location($redirect_url);
     }
-
     public function signInView()
     {
         return Inertia::render("Auth/SignIn", [
             "app_name" => config("app.name"),
         ]);
     }
-
     public function signIn(Request $request)
     {
         $credentials = $request->validate([
@@ -65,7 +61,6 @@ class AuthController extends Controller
             "message" => "Authentication failed",
         ]);
     }
-
     public function signOut($password_changed = false)
     {
         Auth::logout();
@@ -79,7 +74,6 @@ class AuthController extends Controller
         }
         return Inertia::location("/auth/signin");
     }
-
     public function registerView()
     {
         if (session('participant_id')) {

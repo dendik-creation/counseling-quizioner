@@ -10,7 +10,7 @@ use App\Models\Choice;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
-class QuestionnairesController extends Controller
+class AnswerController extends Controller
 {
     public function guide()
     {

@@ -1,5 +1,10 @@
 import { PageTitleProps } from "@/Partials/PageTitle";
 
+export type PageTitleProps = {
+    title?: string;
+    description?: string;
+};
+
 interface PaginationLink {
     url: string;
     label: string;

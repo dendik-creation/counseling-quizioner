@@ -3,10 +3,11 @@
 use Illuminate\Support\Facades\Route;
 // Global Controllers
 use App\Http\Controllers\global\AuthController;
-use App\Http\Controllers\Answer\QuestionnairesController;
+//Anwers Controllers
+use App\Http\Controllers\Answer\AnswerController as AnswerController;
 // Admin Controllers
 use App\Http\Controllers\global\DashboardController;
-use App\Http\Controllers\admin\ParticipantController;
+use App\Http\Controllers\admin\QuestionnaireController as AdminQuestionnaireController;
 use App\Http\Controllers\admin\UserController as AdminUserController;
 use App\Http\Controllers\admin\OriginController as AdminOriginController;
 use App\Http\Controllers\admin\ParticipantController as AdminParticipantController;
@@ -109,14 +110,43 @@ Route::prefix("admin")
                     "destroy",
                 ])->name("destroy");
             });
+        // Master questionnaires
+        Route::prefix("questionnaire")
+            ->name("admin.questionnaire.")
+            ->group(function () {
+               Route::get("/", [
+                    AdminQuestionnaireController::class,
+                    "index",
+                ])->name("index");
+                Route::get("/create", [
+                    AdminQuestionnaireController::class,
+                    "create",
+                ])->name("create");
+                Route::post("/", [
+                    AdminQuestionnaireController::class,
+                    "store",
+                ])->name("store");
+                Route::get("/{id}/edit", [
+                    AdminQuestionnaireController::class,
+                    "edit",
+                ])->name("edit");
+                Route::put("/{id}", [
+                    AdminQuestionnaireController::class,
+                    "update",
+                ])->name("update");
+                Route::delete("/{id}", [
+                    AdminQuestionnaireController::class,
+                    "destroy",
+                ])->name("destroy");
+            });
     });
 
 // Kuisonair Routes
 Route::middleware(['participant', 'answering'])->group(function () {
-    Route::get('/guide', [QuestionnairesController::class, 'guide'])->name('guide');
+    Route::get('/guide', [AnswerController::class, 'guide'])->name('guide');
 
     Route::middleware(['answering'])->group(function () {
-        Route::get('/questionnaire/in-progress', [QuestionnairesController::class, 'answerIndex']);
-        Route::post('/questionnaire/in-progress', [QuestionnairesController::class, 'answerStore']);
+        Route::get('/questionnaire/in-progress', [AnswerController::class, 'answerIndex']);
+        Route::post('/questionnaire/in-progress', [AnswerController::class, 'answerStore']);
     });
 });

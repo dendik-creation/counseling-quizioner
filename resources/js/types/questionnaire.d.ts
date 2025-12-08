@@ -3,9 +3,10 @@ import { Answer, Question } from "./question";
 
 export type Questionnaire = {
     id: number;
-    name: string;
+    title: string;
     description: string;
-    is_open: boolean | number;
+    expires_at: string;
+    access_token: string;
     questions: Question[];
 };
 
