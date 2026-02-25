@@ -21,14 +21,14 @@ import {
     KeyRound,
     Hash,
 } from "lucide-react";
-import { useEffect } from "react";  
+import { useEffect } from "react";
 
 export default function Registration({
     app_name,
-    participantOrigin,
+    origins,
 }: {
     app_name: string;
-    participantOrigin: any[];
+    origins: any[];
 }) {
     const { flash } = usePage().props as any;
     const { data, setData, post, processing, errors, setError } = useForm({
@@ -60,12 +60,7 @@ export default function Registration({
         if (!data.unique_code) setError("unique_code", "Masukkan kode unik");
         if (!data.origin_id) setError("origin_id", "Pilih asal peserta");
         if (!data.token) setError("token", "Masukkan token");
-        if (
-            !data.name ||
-            !data.unique_code ||
-            !data.origin_id ||
-            !data.token
-        )
+        if (!data.name || !data.unique_code || !data.origin_id || !data.token)
             return;
 
         post("/auth/register", {
@@ -138,9 +133,7 @@ export default function Registration({
                                             setData("name", e.target.value)
                                         }
                                         className={`pl-10 py-6 ${
-                                            errors.name
-                                                ? "border-red-500"
-                                                : ""
+                                            errors.name ? "border-red-500" : ""
                                         }`}
                                     />
                                 </div>
@@ -162,7 +155,7 @@ export default function Registration({
                                         onChange={(e) =>
                                             setData(
                                                 "unique_code",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                         className={`pl-10 py-6 ${
@@ -184,7 +177,7 @@ export default function Registration({
                                     </span>
                                     <SelectSearchInput
                                         placeholder="Pilih Asal Peserta"
-                                        options={participantOrigin}
+                                        options={origins}
                                         value={data.origin_id}
                                         removeValue={() =>
                                             setData("origin_id", "")

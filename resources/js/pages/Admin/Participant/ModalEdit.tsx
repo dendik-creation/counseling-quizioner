@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { SelectOption } from "@/types/global";
-import { ParticipantOrigin } from "@/types/origin";
+import { Origin } from "@/types/origin";
 import { Participant } from "@/types/participant";
 import { useForm } from "@inertiajs/react";
 import {

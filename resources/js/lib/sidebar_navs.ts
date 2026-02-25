@@ -1,4 +1,11 @@
-import { BookUser, Earth, Grid2X2, LucideProps, Users, ListTodo } from "lucide-react";
+import {
+    BookUser,
+    Earth,
+    Grid2X2,
+    LucideProps,
+    Users,
+    ListTodo,
+} from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type NavItems = {
@@ -44,6 +51,23 @@ const adminNavs: NavItems = [
         type: "item",
         title: "Kuis & Pertanyaan",
         url: "/admin/questionnaire",
+        icon: ListTodo,
+    },
+    {
+        type: "splitter",
+        title: "Proses Kuisioner",
+        url: "#",
+    },
+    {
+        type: "item",
+        title: "Hasil Kuisioner",
+        url: "/admin/results",
+        icon: ListTodo,
+    },
+    {
+        type: "item",
+        title: "Laporan",
+        url: "/admin/reports",
         icon: ListTodo,
     },
 ];

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Participant;
-use App\Models\ParticipantOrigin;
+use App\Models\Origin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
@@ -16,7 +16,7 @@ class ParticipantController extends Controller
         $by_search = $request->query("search");
         $by_origin = $request->query("origin");
 
-        $origins = ParticipantOrigin::all()->map(function ($origin) {
+        $origins = Origin::all()->map(function ($origin) {
             return [
                 "label" => $origin->name,
                 "value" => $origin->id,

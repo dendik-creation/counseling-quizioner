@@ -6,6 +6,7 @@ export type User = {
     username: string;
     name: string;
     level: 1 | 2 | 3; // 1: Admin, 2: MGBK, 3: Counseling Teacher
+    is_active: booelan;
     created_at?: string;
     updated_at?: string;
 };

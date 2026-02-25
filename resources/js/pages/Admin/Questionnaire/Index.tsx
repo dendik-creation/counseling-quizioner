@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import ConfirmDialog from "@/components/custom/ConfirmDialog";
 import { CircleCheck, CircleX, Pencil, Plus, Trash2 } from "lucide-react";
 import EmptyTable from "@/components/custom/EmptyTable";
+import { ymdToIdDate } from "@/components/helper/helper";
 
 const QuestionnaireIndex = ({
     title,
@@ -52,14 +53,20 @@ const QuestionnaireIndex = ({
                                 Deskripsi Singkat
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
+                                Token
+                            </TableHead>
+                            <TableHead className="bg-stone-200 font-semibold">
+                                Expired Pada
+                            </TableHead>
+                            <TableHead className="bg-stone-200 font-semibold">
                                 Aksi
                             </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {questionnaires.length ? (
-                            questionnaires.map(
-                                (questionnaire: any, idx: number) => (
+                        {questionnaires.data.length ? (
+                            questionnaires.data.map(
+                                (questionnaire, idx: number) => (
                                     <TableRow key={questionnaire.id}>
                                         <TableCell>{idx + 1}</TableCell>
                                         <TableCell>
@@ -70,9 +77,18 @@ const QuestionnaireIndex = ({
                                             50
                                                 ? questionnaire.description.slice(
                                                       0,
-                                                      50
+                                                      50,
                                                   ) + "..."
                                                 : questionnaire.description}
+                                        </TableCell>
+                                        <TableCell>
+                                            {questionnaire.access_token}
+                                        </TableCell>
+                                        <TableCell>
+                                            {ymdToIdDate(
+                                                questionnaire.expires_at,
+                                                true,
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
@@ -89,7 +105,7 @@ const QuestionnaireIndex = ({
                                                 </Link>
                                                 <ConfirmDialog
                                                     title="Hapus Kuesioner"
-                                                    description={`Apakah Anda yakin ingin menghapus kuesioner ${questionnaire.name}?`}
+                                                    description={`Apakah Anda yakin ingin menghapus kuesioner ${questionnaire.title}?`}
                                                     triggerNode={
                                                         <span>
                                                             <Button
@@ -104,19 +120,19 @@ const QuestionnaireIndex = ({
                                                     type="danger"
                                                     confirmAction={() =>
                                                         handleDeleteQuestionnaire(
-                                                            questionnaire.id as number
+                                                            questionnaire.id as number,
                                                         )
                                                     }
                                                 />
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                )
+                                ),
                             )
                         ) : (
                             <EmptyTable
-                                colSpan={5}
-                                message="Asal partisipan tidak ada"
+                                colSpan={6}
+                                message="Tidak ada kuesioner tersedia"
                             />
                         )}
                     </TableBody>

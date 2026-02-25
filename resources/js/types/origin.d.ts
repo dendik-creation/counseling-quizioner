@@ -1,7 +1,7 @@
 import { PageTitleProps } from "@/Partials/PageTitle";
 import { PaginationData } from "./global";
 
-export type ParticipantOrigin = {
+export type Origin = {
     id: number;
     name: string;
     type: string;
@@ -9,6 +9,6 @@ export type ParticipantOrigin = {
 };
 
 export type AdminOriginIndexProps = PageTitleProps & {
-    origins: PaginationData<ParticipantOrigin>;
+    origins: PaginationData<Origin>;
     search?: string;
 };

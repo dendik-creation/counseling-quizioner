@@ -16,6 +16,9 @@ return new class extends Migration {
             $table->string("name");
             $table->integer("level");
             $table->string("password");
+            $table
+                ->enum("active_status", ["pending", "active", "rejected"])
+                ->default("active");
             $table->timestamps();
         });
 

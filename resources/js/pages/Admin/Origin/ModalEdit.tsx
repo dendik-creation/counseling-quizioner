@@ -12,7 +12,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ParticipantOrigin } from "@/types/origin";
+import { Origin } from "@/types/origin";
 import { useForm } from "@inertiajs/react";
 import {
     CircleFadingPlus,
@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import React from "react";
 
-const AdminOriginEdit = ({ origin }: { origin: ParticipantOrigin }) => {
+const AdminOriginEdit = ({ origin }: { origin: Origin }) => {
     const {
         data,
         setData,

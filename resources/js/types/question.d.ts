@@ -6,7 +6,6 @@ export type Question = {
     id: number;
     questionnaire_id: number;
     question: string;
-    choices: Choice[];
 };
 
 export type Choice = {

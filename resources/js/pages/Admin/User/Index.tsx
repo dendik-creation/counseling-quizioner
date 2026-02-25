@@ -135,6 +135,9 @@ const AdminUserIndex = ({
                                 Bergabung sejak
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
+                                Status Aktif
+                            </TableHead>
+                            <TableHead className="bg-stone-200 font-semibold">
                                 Aksi
                             </TableHead>
                         </TableRow>

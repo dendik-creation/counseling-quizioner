@@ -11,6 +11,7 @@ use App\Http\Controllers\admin\QuestionnaireController as AdminQuestionnaireCont
 use App\Http\Controllers\admin\UserController as AdminUserController;
 use App\Http\Controllers\admin\OriginController as AdminOriginController;
 use App\Http\Controllers\admin\ParticipantController as AdminParticipantController;
+use App\Http\Controllers\admin\ResultController as AdminResultController;
 
 Route::get("/", [AuthController::class, "signedInStatus"])->name("login");
 Route::prefix("auth")->group(function () {
@@ -114,7 +115,7 @@ Route::prefix("admin")
         Route::prefix("questionnaire")
             ->name("admin.questionnaire.")
             ->group(function () {
-               Route::get("/", [
+                Route::get("/", [
                     AdminQuestionnaireController::class,
                     "index",
                 ])->name("index");
@@ -139,14 +140,37 @@ Route::prefix("admin")
                     "destroy",
                 ])->name("destroy");
             });
+
+        // Results Routes
+        Route::prefix("results")
+            ->name("admin.results.")
+            ->group(function () {
+                Route::get("/", [AdminResultController::class, "index"])->name(
+                    "index",
+                );
+                Route::get("/{id}", [
+                    AdminResultController::class,
+                    "show",
+                ])->name("show");
+                Route::delete("/{id}", [
+                    AdminResultController::class,
+                    "destroy",
+                ])->name("destroy");
+            });
     });
 
 // Kuisonair Routes
-Route::middleware(['participant', 'answering'])->group(function () {
-    Route::get('/guide', [AnswerController::class, 'guide'])->name('guide');
+Route::middleware(["participant", "answering"])->group(function () {
+    Route::get("/guide", [AnswerController::class, "guide"])->name("guide");
 
-    Route::middleware(['answering'])->group(function () {
-        Route::get('/questionnaire/in-progress', [AnswerController::class, 'answerIndex']);
-        Route::post('/questionnaire/in-progress', [AnswerController::class, 'answerStore']);
+    Route::middleware(["answering"])->group(function () {
+        Route::get("/questionnaire/in-progress", [
+            AnswerController::class,
+            "answerIndex",
+        ]);
+        Route::post("/questionnaire/in-progress", [
+            AnswerController::class,
+            "answerStore",
+        ]);
     });
 });

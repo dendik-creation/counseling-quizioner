@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Participant;
-use App\Models\ParticipantOrigin;
+use App\Models\Origin;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,15 +15,15 @@ class ParticipantSeed extends Seeder
     public function run(): void
     {
         // Origin
-        ParticipantOrigin::create([
+        Origin::create([
             "name" => "Sekolah 1",
             "type" => "SCHOOL",
         ]);
-        ParticipantOrigin::create([
+        Origin::create([
             "name" => "Sekolah 2",
             "type" => "SCHOOL",
         ]);
-        ParticipantOrigin::create([
+        Origin::create([
             "name" => "Masyarakat Umum",
             "type" => "COMMON",
         ]);

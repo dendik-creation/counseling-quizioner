@@ -1,14 +1,13 @@
 import BlastToaster from "@/components/custom/BlastToaster";
-import {
-    ErrorInput,
-    RichTextEditorInput,
-} from "@/components/custom/FormElement";
+import { DatePickerInput, ErrorInput } from "@/components/custom/FormElement";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import AppLayout from "@/partials/AppLayout";
-import { PageTitle } from "@/Partials/PageTitle";
+import { PageTitle } from "@/partials/PageTitle";
+import { PageTitleProps } from "@/types/global";
 import { QuestionnaireEditProps } from "@/types/questionnaire";
 import { useForm } from "@inertiajs/react";
 import {
@@ -21,147 +20,80 @@ import {
 } from "lucide-react";
 import React from "react";
 
-const choiceLetters = ["A", "B", "C", "D"];
-
-type Choice = {
-    id?: number | null;
-    choice: string;
-    point: number;
-};
-
-type Question = {
-    id?: number | null;
-    question: string;
-    choices: Choice[];
-};
-
-interface FormData {
-    title: string;
-    description: string;
-    expires_at: string;
-    access_token: string;
-    saved_questions: Question[];
-    new_questions: Omit<Question, "id">[];
-    deleted_questions: number[];
-}
-
 const QuestionnaireEdit = ({
     title,
     description,
     questionnaire,
 }: QuestionnaireEditProps) => {
     const { data, setData, put, processing, errors, setError, clearErrors } =
-        useForm<FormData>({
-            title: questionnaire.title ?? "",
-            description: questionnaire.description ?? "",
-            access_token: questionnaire.access_token ?? "",
-            expires_at: questionnaire.expires_at ?? "",
-            saved_questions:
-                questionnaire?.questions?.map((q) => ({
-                    id: typeof q.id === "number" ? q.id : null,
-                    question: q.question ?? "",
-                    choices:
-                        q.choices?.map((c) => ({
-                            id: typeof c.id === "number" ? c.id : null,
-                            choice: c.choice ?? "",
-                            point: c.point ?? 1,
-                        })) ?? [],
-                })) ?? [],
-            new_questions: [],
-            deleted_questions: [],
+        useForm({
+            title: questionnaire.title,
+            description: questionnaire.description,
+            access_token: questionnaire.access_token,
+            expires_at: questionnaire.expires_at,
+            choices: questionnaire.choices,
+            questions: questionnaire.questions,
         });
 
-    const allQuestions: Question[] = [
-        ...(data.saved_questions ?? []),
-        ...(data.new_questions ?? []),
-    ];
+    const newChoices = () => {
+        setData("choices", [
+            ...data.choices,
+            {
+                choice: "",
+                point: 0,
+            },
+        ]);
+    };
 
-    const addNewQuestion = () => {
-        setData("new_questions", [
-            ...data.new_questions,
+    const newQuestion = () => {
+        setData("questions", [
+            ...data.questions,
             {
                 question: "",
-                choices: choiceLetters.map(() => ({
-                    choice: "",
-                    point: 1,
-                })),
             },
         ]);
     };
 
     const removeQuestion = (index: number) => {
-        const savedCount = data.saved_questions.length;
-        if (index < savedCount) {
-            const removed = data.saved_questions[index];
-            if (removed.id) {
-                setData("deleted_questions", [
-                    ...data.deleted_questions,
-                    removed.id,
-                ]);
-            }
-            setData(
-                "saved_questions",
-                data.saved_questions.filter((_, i) => i !== index)
-            );
-        } else {
-            const newIdx = index - savedCount;
-            setData(
-                "new_questions",
-                data.new_questions.filter((_, i) => i !== newIdx)
-            );
-        }
+        setData(
+            "questions",
+            data.questions.filter((_, i) => i !== index),
+        );
     };
 
-    const handleChangeQuestion = (questionIdx: number, value: string) => {
-        const savedCount = data.saved_questions.length;
-        if (questionIdx < savedCount) {
-            const newSaved = [...data.saved_questions];
-            newSaved[questionIdx].question = value;
-            setData("saved_questions", newSaved);
-        } else {
-            const newIdx = questionIdx - savedCount;
-            const newNew = [...data.new_questions];
-            newNew[newIdx].question = value;
-            setData("new_questions", newNew);
-        }
-    };
-
-    const handleChangeChoice = (
-        questionIdx: number,
-        choiceIdx: number,
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const savedCount = data.saved_questions.length;
-        if (questionIdx < savedCount) {
-            const newSaved = [...data.saved_questions];
-            newSaved[questionIdx].choices[choiceIdx][
-                e.target.name as "choice"
-            ] = e.target.value;
-            setData("saved_questions", newSaved);
-        } else {
-            const newIdx = questionIdx - savedCount;
-            const newNew = [...data.new_questions];
-            newNew[newIdx].choices[choiceIdx][e.target.name as "choice"] =
-                e.target.value;
-            setData("new_questions", newNew);
-        }
+    const removeChoice = (index: number) => {
+        setData(
+            "choices",
+            data.choices.filter((_, i) => i !== index),
+        );
     };
 
     const handleChangeQuestionnaire = (
-        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
     ) => {
         setData(e.target.name as "title" | "description", e.target.value);
     };
 
-    const handleChangeChoicePoint = (
-        questionIdx: number,
-        choiceIdx: number,
-        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+    const handleChangeQuestion = (questionIdx: number, value: string) => {
+        const newQuestions = [...data.questions];
+        newQuestions[questionIdx].question = value;
+        setData("questions", newQuestions);
+    };
+
+    const handleChangeChoice = (
+        key: "choice" | "point",
+        index: number,
+        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
     ) => {
-        const newQuestions = [...data.saved_questions];
-        newQuestions[questionIdx].choices[choiceIdx][e.target.name as "point"] =
-            Number(e.target.value);
-        setData("saved_questions", newQuestions);
+        const updatedChoices = data.choices.map((choice, i) => {
+            if (i !== index) return choice;
+            return {
+                ...choice,
+                [key]:
+                    key === "point" ? Number(e.target.value) : e.target.value,
+            };
+        });
+        setData("choices", updatedChoices);
     };
 
     const validateForm = (): boolean => {
@@ -179,21 +111,11 @@ const QuestionnaireEdit = ({
             valid = false;
         }
 
-        allQuestions.forEach((q) => {
-            const cleanQuestion = q.question
-                .replace(/<[^>]+>/g, "")
-                .replace(/&nbsp;/g, "")
-                .trim();
-            if (!cleanQuestion) {
+        data.questions.forEach((q, idx) => {
+            if (!q.question.trim()) {
                 valid = false;
-                hasToasterShown = true;
+                setError(`questions.${idx}`, "Pertanyaan wajib diisi");
             }
-            q.choices.forEach((c) => {
-                if (!c.choice || !c.choice.trim()) {
-                    valid = false;
-                    hasToasterShown = true;
-                }
-            });
         });
 
         if (hasToasterShown || !valid) {
@@ -235,9 +157,9 @@ const QuestionnaireEdit = ({
                                 Informasi Kuisioner
                             </h3>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div className="flex flex-col w-full gap-3">
-                                <div className="flex flex-col">
+                                <div className="flex flex-col w-full">
                                     <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
                                         Nama
                                     </label>
@@ -249,29 +171,24 @@ const QuestionnaireEdit = ({
                                         value={data.title ?? ""}
                                         onChange={handleChangeQuestionnaire}
                                         className={cn(
-                                            errors.title && "border-red-500"
+                                            errors.title && "border-red-500",
                                         )}
                                     />
                                     {errors.title && (
                                         <ErrorInput error={errors.title} />
                                     )}
                                 </div>
-                                <div className="flex flex-col">
+                                <div className="flex flex-col w-full">
                                     <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
                                         Deskripsi
                                     </label>
-                                    <textarea
+                                    <Textarea
                                         name="description"
                                         id="description"
                                         placeholder="Masukkan deskripsi"
                                         value={data.description ?? ""}
                                         onChange={handleChangeQuestionnaire}
-                                        className={cn(
-                                            "border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary",
-                                            errors.description &&
-                                                "border-red-500"
-                                        )}
-                                        rows={2}
+                                        rows={3}
                                     />
                                     {errors.description && (
                                         <ErrorInput
@@ -280,58 +197,168 @@ const QuestionnaireEdit = ({
                                     )}
                                 </div>
                             </div>
-                            <div className="flex flex-col w-full">
+                            <div className="flex flex-col mb-3 w-full">
                                 <label className="text-base mb-4 after:content-['*'] after:text-red-500 after:ml-1">
                                     Generate Token
                                     <span className="text-sm">
                                         {" "}
-                                        (Token tidak bisa digunakan setelah
-                                        tanggal expired)
+                                        (Token digunakan untuk mengakses
+                                        kuisioner)
                                     </span>
                                 </label>
 
-                                <div className="flex flex-col justify-center items-start gap-3">
+                                <div className="flex flex-col mb-2 lg:flex-row gap-5">
                                     <Button
-                                        variant={"green"}
+                                        variant="green"
                                         type="button"
-                                        size={"default"}
+                                        size="sm"
                                         onClick={() => {
                                             const token = generateStringRand(6);
                                             setData("access_token", token);
                                         }}
                                     >
-                                        <RefreshCcw />
+                                        Buat Token
                                     </Button>
-
-                                    <div className="w-full mb-4">
-                                        <h1
-                                            className="text-4xl text-center font-bold"
-                                            id="access_token"
-                                        >
-                                            {data.access_token || "Token Belum Dibuat"}
-                                        </h1>
-                                    </div>
-
-                                    <Input
-                                        type="datetime-local"
-                                        name="expires_at"
-                                        id="expires_at"
-                                        placeholder="Masukan tanggal expired"
-                                        value={data.expires_at ?? ""}
-                                        onChange={handleChangeQuestionnaire}
-                                        className={cn(
-                                            errors.expires_at &&
-                                                "border-red-500"
+                                    <div>
+                                        <span className="font-mono text-normal text-lg">
+                                            {data.access_token ||
+                                                "Token belum dibuat"}
+                                        </span>
+                                        {errors.access_token && (
+                                            <ErrorInput
+                                                error={errors.access_token}
+                                            />
                                         )}
-                                    />
-                                    {errors.expires_at && (
-                                        <ErrorInput error={errors.expires_at} />
-                                    )}
+                                    </div>
                                 </div>
+                                <DatePickerInput
+                                    mode="single"
+                                    placeholder="Expired"
+                                    value={data.expires_at}
+                                    withTime={true}
+                                    onChange={(date: string | undefined) =>
+                                        setData("expires_at", date ?? "")
+                                    }
+                                    className={cn(
+                                        errors.expires_at && "border-red-500",
+                                    )}
+                                />
+                                {errors.expires_at && (
+                                    <ErrorInput error={errors.expires_at} />
+                                )}
                             </div>
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* CHOICES */}
+                <div className="flex mb-3 items-center justify-end w-full">
+                    <div className="sticky z-10 bg-white py-2">
+                        <Button
+                            variant={"yellow"}
+                            className="flex items-center gap-2"
+                            onClick={newChoices}
+                            type="button"
+                        >
+                            <PlusCircle />
+                            <span>Tambah Pilihan</span>
+                        </Button>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    {data.choices.map((choice, idx) => (
+                        <Card className="py-3" key={idx}>
+                            <CardContent className="px-3">
+                                <div className="flex justify-between items-center gap-3 mb-2">
+                                    <div className="flex items-center gap-3">
+                                        <ListTodo className="text-slate-400" />
+                                        <h3 className="font-semibold">
+                                            Pilihan {idx + 1}
+                                        </h3>
+                                    </div>
+                                    {idx > 0 && (
+                                        <Button
+                                            type="button"
+                                            size={"sm"}
+                                            variant={"red"}
+                                            onClick={() => removeChoice(idx)}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <MinusCircle />
+                                            <span>Hapus</span>
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="flex flex-col w-full">
+                                        <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                            Pilihan
+                                        </label>
+                                        <Textarea
+                                            name={`choice-${idx}`}
+                                            placeholder="Masukkan pilihan"
+                                            rows={3}
+                                            value={choice.choice}
+                                            onChange={(e) =>
+                                                handleChangeChoice(
+                                                    "choice",
+                                                    idx,
+                                                    e,
+                                                )
+                                            }
+                                            className={cn(
+                                                errors[
+                                                    `choices.${idx}.choice`
+                                                ] && "border-red-500",
+                                            )}
+                                        />
+                                        {errors[`choices.${idx}.choice`] && (
+                                            <ErrorInput
+                                                error={
+                                                    errors[
+                                                        `choices.${idx}.choice`
+                                                    ]
+                                                }
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col w-full">
+                                        <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                            Poin
+                                        </label>
+                                        <Input
+                                            type="number"
+                                            name={`point-${idx}`}
+                                            placeholder="Masukkan poin"
+                                            value={choice.point}
+                                            onChange={(e) =>
+                                                handleChangeChoice(
+                                                    "point",
+                                                    idx,
+                                                    e,
+                                                )
+                                            }
+                                            className={cn(
+                                                errors[
+                                                    `choices.${idx}.point`
+                                                ] && "border-red-500",
+                                            )}
+                                        />
+                                        {errors[`choices.${idx}.point`] && (
+                                            <ErrorInput
+                                                error={
+                                                    errors[
+                                                        `choices.${idx}.point`
+                                                    ]
+                                                }
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
 
                 {/* QUESTIONS */}
                 <div className="flex mb-3 items-center justify-end w-full">
@@ -339,7 +366,7 @@ const QuestionnaireEdit = ({
                         <Button
                             variant={"yellow"}
                             className="flex items-center gap-2"
-                            onClick={addNewQuestion}
+                            onClick={newQuestion}
                             type="button"
                         >
                             <PlusCircle />
@@ -347,114 +374,67 @@ const QuestionnaireEdit = ({
                         </Button>
                     </div>
                 </div>
-                {allQuestions.map((question, questionIdx) => (
-                    <Card className="py-3 mb-4" key={questionIdx}>
-                        <CardContent className="px-3">
-                            <div className="flex justify-between items-center gap-3 mb-2">
-                                <div className="flex items-center gap-3">
-                                    <ListTodo className="text-slate-400" />
-                                    <h3 className="font-semibold">
-                                        Pertanyaan & Pilihan Jawab -{" "}
-                                        {questionIdx + 1}
-                                    </h3>
-                                </div>
-                                {allQuestions.length > 1 && (
-                                    <Button
-                                        type="button"
-                                        size={"sm"}
-                                        variant={"red"}
-                                        onClick={() =>
-                                            removeQuestion(questionIdx)
-                                        }
-                                        className="flex items-center gap-2"
-                                    >
-                                        <MinusCircle />
-                                        <span>Hapus</span>
-                                    </Button>
-                                )}
-                            </div>
-                            <div className="flex flex-col w-full">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex flex-col w-full">
-                                        <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
-                                            Pertanyaan
-                                        </label>
-                                        <RichTextEditorInput
-                                            height={300}
-                                            content={question.question}
-                                            onChange={(val) =>
-                                                handleChangeQuestion(
-                                                    questionIdx,
-                                                    val
-                                                )
-                                            }
-                                        />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    {data.questions.map((question, questionIdx) => (
+                        <Card className="py-3" key={questionIdx}>
+                            <CardContent className="px-3">
+                                <div className="flex justify-between items-center gap-3 mb-2">
+                                    <div className="flex items-center gap-3">
+                                        <ListTodo className="text-slate-400" />
+                                        <h3 className="font-semibold">
+                                            Pertanyaan {questionIdx + 1}
+                                        </h3>
                                     </div>
-                                    <div className="flex flex-col w-full">
-                                        <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
-                                            Pilihan Jawaban
-                                        </label>
-                                        <div className="flex flex-col gap-2">
-                                            {question.choices.map(
-                                                (choice, choiceIdx) => (
-                                                    <div
-                                                        key={choiceIdx}
-                                                        className="flex items-center gap-2 relative"
-                                                    >
-                                                        <div className="absolute rounded-l-md bg-amber-200 h-full flex items-center justify-center w-8">
-                                                            <span className="font-semibold">
-                                                                {String.fromCharCode(
-                                                                    65 +
-                                                                        choiceIdx
-                                                                )}
-                                                            </span>
-                                                        </div>
-                                                        <Input
-                                                            type="text"
-                                                            className="flex-9 ps-10"
-                                                            name="choice"
-                                                            value={
-                                                                choice.choice
-                                                            }
-                                                            onChange={(e) =>
-                                                                handleChangeChoice(
-                                                                    questionIdx,
-                                                                    choiceIdx,
-                                                                    e
-                                                                )
-                                                            }
-                                                        />
-                                                        <Input
-                                                            type="number"
-                                                            className="flex-1 ps-5"
-                                                            name="point"
-                                                            value={choice.point}
-                                                            onChange={(e) =>
-                                                                handleChangeChoicePoint(
-                                                                    questionIdx,
-                                                                    choiceIdx,
-                                                                    e
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                )
-                                            )}
+                                    {questionIdx > 0 && (
+                                        <Button
+                                            type="button"
+                                            size={"sm"}
+                                            variant={"red"}
+                                            onClick={() =>
+                                                removeQuestion(questionIdx)
+                                            }
+                                            className="flex items-center gap-2"
+                                        >
+                                            <MinusCircle />
+                                            <span>Hapus</span>
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="flex flex-col w-full">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex flex-col w-full">
+                                            <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                                Pertanyaan
+                                            </label>
+                                            <Textarea
+                                                value={question.question}
+                                                onChange={(e) =>
+                                                    handleChangeQuestion(
+                                                        questionIdx,
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                placeholder="Masukkan pertanyaan"
+                                                className={cn(
+                                                    "border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary",
+                                                )}
+                                                rows={3}
+                                            />
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
                 <Button
                     type="submit"
                     variant={"blue"}
-                    className="flex w-full items-center gap-2"
                     disabled={processing}
+                    className="flex w-full items-center gap-2"
                 >
                     <Save />
-                    <span>Simpan</span>
+                    <span>Perbarui</span>
                 </Button>
             </form>
         </AppLayout>

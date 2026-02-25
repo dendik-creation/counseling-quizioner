@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ParticipantOrigin;
+use App\Models\Origin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
@@ -13,7 +13,7 @@ class OriginController extends Controller
     public function index(Request $request)
     {
         $search = $request->query("search");
-        $origins = ParticipantOrigin::withCount([
+        $origins = Origin::withCount([
             "participants as participant_count",
         ])->paginate(config("custom.default.pagination"));
         return Inertia::render("Admin/Origin/Index", [
@@ -32,14 +32,14 @@ class OriginController extends Controller
             "type" => "required|max:255",
         ]);
 
-        ParticipantOrigin::create($validated);
+        Origin::create($validated);
         Session::flash("success", "Asal partisipan berhasil ditambahkan.");
         return Inertia::location(route("admin.origins.index"));
     }
 
     public function update(Request $request, $id)
     {
-        $origin = ParticipantOrigin::findOrFail($id);
+        $origin = Origin::findOrFail($id);
         if (!$origin) {
             Session::flash("error", "Asal partisipan tidak ditemukan");
             return Inertia::location(route("admin.origins.index"));
@@ -57,7 +57,7 @@ class OriginController extends Controller
 
     public function destroy($id)
     {
-        $origin = ParticipantOrigin::findOrFail($id);
+        $origin = Origin::findOrFail($id);
         if (!$origin) {
             Session::flash("error", "Asal partisipan tidak ditemukan");
             return Inertia::location(route("admin.origins.index"));

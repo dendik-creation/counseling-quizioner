@@ -16,9 +16,9 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, Printer } from "lucide-react";
 import { Link, router } from "@inertiajs/react";
-import NotFoundInTable from "@/components/custom/NotFoundInTable";
 import { PaginatorBuilder, SearchInput } from "@/components/custom/FormElement";
-import { inputDebounce } from "@/components/helper/input_debounce";
+import { inputDebounce } from "@/components/helper/helper";
+import EmptyTable from "@/components/custom/EmptyTable";
 
 const QuestionnaireResultIndex = ({
     title,
@@ -28,7 +28,7 @@ const QuestionnaireResultIndex = ({
 }: QuestionnaireResultIndexProps) => {
     const [searchValue, setSearchValue] = useState<string>(search || "");
     const [answersData, setAnswersData] = useState<QuestionnaireAnswerList[]>(
-        answers.data
+        answers.data,
     );
     const debouncedSearch = inputDebounce(async (value: string) => {
         router.get(
@@ -39,10 +39,10 @@ const QuestionnaireResultIndex = ({
                 replace: true,
                 onSuccess: (page) => {
                     setAnswersData(
-                        page.props.answers as QuestionnaireAnswerList[]
+                        page.props.answers as QuestionnaireAnswerList[],
                     );
                 },
-            }
+            },
         );
     });
 
@@ -69,7 +69,7 @@ const QuestionnaireResultIndex = ({
                     onClick={() => {
                         window.open(
                             `/admin/result/print-all?search=${searchValue}`,
-                            "_blank"
+                            "_blank",
                         );
                     }}
                 >
@@ -137,7 +137,7 @@ const QuestionnaireResultIndex = ({
                                                 onClick={() => {
                                                     window.open(
                                                         `/admin/result/print/${answer.questionnaire_id}/${answer.participant_id}`,
-                                                        "_blank"
+                                                        "_blank",
                                                     );
                                                 }}
                                             >
@@ -148,7 +148,7 @@ const QuestionnaireResultIndex = ({
                                 </TableRow>
                             ))
                         ) : (
-                            <NotFoundInTable colSpan={6} />
+                            <EmptyTable colSpan={6} />
                         )}
                     </TableBody>
                 </Table>

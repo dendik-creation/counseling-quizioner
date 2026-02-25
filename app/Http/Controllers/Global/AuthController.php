@@ -7,7 +7,7 @@ use Inertia\Inertia;
 use App\Models\Participant;
 use Illuminate\Http\Request;
 use App\Models\Questionnaire;
-use App\Models\ParticipantOrigin;
+use App\Models\Origin;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -80,14 +80,14 @@ class AuthController extends Controller
             return redirect()->route('guide');
         }
 
-        $participantOrigin = ParticipantOrigin::all();
-        $participantOrigin = $participantOrigin->map(function ($origin) {
+        $origins = Origin::all();
+        $origins = $origins->map(function ($origin) {
             return [
                 'value' => $origin->id,
                 'label' => $origin->name
             ];
         });
-        return Inertia::render("Auth/Registration", ["app_name" => 'Register', 'participantOrigin' => $participantOrigin]);
+        return Inertia::render("Auth/Registration", ["app_name" => 'Register', 'origins' => $origins]);
     }
 
     public function registerStore(Request $request)
@@ -95,7 +95,7 @@ class AuthController extends Controller
         $data = $request->validate([
             "name" => "required",
             "unique_code" => "required",
-            "origin_id" => "required|exists:participant_origins,id",
+            "origin_id" => "required|exists:origins,id",
             "token" => "required",
         ]);
 

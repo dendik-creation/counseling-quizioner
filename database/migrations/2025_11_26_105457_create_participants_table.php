@@ -21,7 +21,7 @@ return new class extends Migration {
             $table
                 ->foreign("origin_id")
                 ->references("id")
-                ->on("participant_origins")
+                ->on("origins")
                 ->nullOnDelete();
         });
     }

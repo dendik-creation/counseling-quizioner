@@ -1,5 +1,5 @@
 import { PageTitleProps, PaginationData } from "./global";
-import { Answer, Question } from "./question";
+import { Answer, Choice, Question } from "./question";
 
 export type Questionnaire = {
     id: number;
@@ -8,10 +8,11 @@ export type Questionnaire = {
     expires_at: string;
     access_token: string;
     questions: Question[];
+    choices: Choice[];
 };
 
 export type QuestionnaireIndexProps = PageTitleProps & {
-    questionnaires: Questionnaire[];
+    questionnaires: PaginationData<Questionnaire>;
 };
 
 export type QuestionnaireEditProps = PageTitleProps & {

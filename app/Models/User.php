@@ -18,7 +18,7 @@ class User extends Authenticatable
             "password" => "hashed",
         ];
     }
-    // Roles
+    // Role Levels
     const ROLE_ADMIN = 1;
     const ROLE_MGBK = 2;
     const ROLE_COUNSELING_TEACHER = 3;
