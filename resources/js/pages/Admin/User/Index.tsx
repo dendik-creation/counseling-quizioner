@@ -28,6 +28,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const AdminUserIndex = ({
     title,
@@ -155,6 +156,19 @@ const AdminUserIndex = ({
                                     {ymdToIdDate(user.created_at)}
                                 </TableCell>
                                 <TableCell>
+                                    {user.is_active == null ? (
+                                        <Badge variant={"outline"}>
+                                            Butuh Persetujuan
+                                        </Badge>
+                                    ) : user.is_active ? (
+                                        <Badge variant={"green"}>Aktif</Badge>
+                                    ) : (
+                                        <Badge variant={"red"}>
+                                            Tidak Aktif
+                                        </Badge>
+                                    )}
+                                </TableCell>
+                                <TableCell>
                                     <div className="flex items-center gap-2">
                                         <AdminUserEdit user={user} />
                                         <AdminUserModalResetPassword
@@ -188,14 +202,17 @@ const AdminUserIndex = ({
                     </TableBody>
                 </Table>
             </div>
-            {users.total > users.per_page && (
-                <PaginatorBuilder
-                    prevUrl={users.prev_page_url ?? "#"}
-                    nextUrl={users.next_page_url ?? "#"}
-                    currentPage={users.current_page}
-                    totalPage={users.last_page}
-                />
-            )}
+            <div className="flex flex-col lg:flex-row justify-between items-center mt-3">
+                <p className="text-sm w-full">Total {users.total} Data</p>
+                {users.total > users.per_page && (
+                    <PaginatorBuilder
+                        prevUrl={users.prev_page_url ?? "#"}
+                        nextUrl={users.next_page_url ?? "#"}
+                        currentPage={users.current_page}
+                        totalPage={users.last_page}
+                    />
+                )}
+            </div>
         </AppLayout>
     );
 };

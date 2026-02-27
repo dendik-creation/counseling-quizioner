@@ -53,6 +53,20 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->is_active === 0) {
+            return back()->withErrors([
+                "message" =>
+                    "Akun Anda dinonaktifkan. Hubungi MGBK atau Admin terkait",
+            ]);
+        }
+
+        if (is_null($user->is_active)) {
+            return back()->withErrors([
+                "message" =>
+                    "Akun ada perlu diverifikasi oleh MGBK atau Admin. Tunggu beberapa waktu",
+            ]);
+        }
+
         if (Auth::attempt($credentials)) {
             return Inertia::location("/");
         }
@@ -76,18 +90,21 @@ class AuthController extends Controller
     }
     public function registerView()
     {
-        if (session('participant_id')) {
-            return redirect()->route('guide');
+        if (session("participant_id")) {
+            return redirect()->route("guide");
         }
 
         $origins = Origin::all();
         $origins = $origins->map(function ($origin) {
             return [
-                'value' => $origin->id,
-                'label' => $origin->name
+                "value" => $origin->id,
+                "label" => $origin->name,
             ];
         });
-        return Inertia::render("Auth/Registration", ["app_name" => 'Register', 'origins' => $origins]);
+        return Inertia::render("Auth/Registration", [
+            "app_name" => "Register",
+            "origins" => $origins,
+        ]);
     }
 
     public function registerStore(Request $request)
@@ -99,7 +116,9 @@ class AuthController extends Controller
             "token" => "required",
         ]);
 
-        $questionnaires = Questionnaire::where("access_token", $request->token)->where("expires_at", ">=", now())->first();
+        $questionnaires = Questionnaire::where("access_token", $request->token)
+            ->where("expires_at", ">=", now())
+            ->first();
         if (!$questionnaires) {
             return back()->withErrors([
                 "message" => "Token tidak ditemukan / expired",
@@ -107,15 +126,19 @@ class AuthController extends Controller
         }
 
         $participant = Participant::create($data);
-        session(['token' => $request->token, 'participant_id' => $participant->id, 'questionnaires_id' => $questionnaires->id]);
+        session([
+            "token" => $request->token,
+            "participant_id" => $participant->id,
+            "questionnaires_id" => $questionnaires->id,
+        ]);
 
-        Session::flash('success', 'Registrasi berhasil');
-        return Inertia::location('/guide');
+        Session::flash("success", "Registrasi berhasil");
+        return Inertia::location("/guide");
     }
 
     public function unregisterStore()
     {
-        session()->forget(['answers', 'participant_id']);
-        return Inertia::location('/');
+        session()->forget(["answers", "participant_id"]);
+        return Inertia::location("/");
     }
 }

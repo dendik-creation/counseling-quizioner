@@ -141,3 +141,20 @@ export const humanizeOriginType = (type: string) => {
             return "Lainnya";
     }
 };
+
+export const shortOfChoice = (choice: string) => {
+    switch (choice.toLowerCase()) {
+        case "selalu":
+            return "SL";
+        case "sering":
+            return "Sr";
+        case "kadang":
+            return "KD";
+        case "jarang":
+            return "Jarang";
+        case "tidak pernah":
+            return "TP";
+        default:
+            return choice;
+    }
+};

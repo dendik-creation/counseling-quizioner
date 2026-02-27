@@ -19,14 +19,6 @@ export type QuestionnaireEditProps = PageTitleProps & {
     questionnaire: Questionnaire;
 };
 
-export type Participant = {
-    id: number;
-    fullname: string;
-    nisn: string;
-    school_id: number;
-    class: string;
-};
-
 export type QuestionnaireAnswerList = {
     participant_name: string;
     participant_id: number;

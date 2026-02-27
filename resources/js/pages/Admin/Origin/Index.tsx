@@ -156,14 +156,17 @@ const AdminOriginIndex = ({
                     </TableBody>
                 </Table>
             </div>
-            {origins.total > origins.per_page && (
-                <PaginatorBuilder
-                    prevUrl={origins.prev_page_url ?? "#"}
-                    nextUrl={origins.next_page_url ?? "#"}
-                    currentPage={origins.current_page}
-                    totalPage={origins.last_page}
-                />
-            )}
+            <div className="flex flex-col lg:flex-row justify-between items-center mt-3">
+                <p className="text-sm w-full">Total {origins.total} Data</p>
+                {origins.total > origins.per_page && (
+                    <PaginatorBuilder
+                        prevUrl={origins.prev_page_url ?? "#"}
+                        nextUrl={origins.next_page_url ?? "#"}
+                        currentPage={origins.current_page}
+                        totalPage={origins.last_page}
+                    />
+                )}
+            </div>
         </AppLayout>
     );
 };

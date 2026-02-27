@@ -16,11 +16,11 @@ class ParticipantSeed extends Seeder
     {
         // Origin
         Origin::create([
-            "name" => "Sekolah 1",
+            "name" => "SMP 1 Kudus",
             "type" => "SCHOOL",
         ]);
         Origin::create([
-            "name" => "Sekolah 2",
+            "name" => "SMK 2 Kudus",
             "type" => "SCHOOL",
         ]);
         Origin::create([
@@ -31,21 +31,21 @@ class ParticipantSeed extends Seeder
         // Participant
         Participant::create([
             "unique_code" => "0001",
-            "name" => "Partisipan Satu",
+            "name" => "Akbar",
             "origin_id" => 1,
-            "class" => "12",
+            "class" => "7",
         ]);
         Participant::create([
             "unique_code" => "0002",
-            "name" => "Partisipan Dua",
+            "name" => "Bima",
             "origin_id" => 2,
-            "class" => "10",
+            "class" => "12",
         ]);
         Participant::create([
             "unique_code" => "0003",
-            "name" => "Partisipan Tiga",
+            "name" => "Agung",
             "origin_id" => 3,
-            "work" => "Pedagang",
+            "work" => "Mekanik",
         ]);
     }
 }

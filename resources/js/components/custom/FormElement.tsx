@@ -33,6 +33,7 @@ import { ymdToIdDate } from "../helper/helper";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import axios from "axios";
+import { Link } from "@inertiajs/react";
 
 registerPlugin(FilePondPluginFileValidateType);
 
@@ -692,13 +693,17 @@ export const PaginatorBuilder = ({
     const pageNumbers = generatePageNumbers();
     const isPrevDisabled = currentPage === 1;
     const isNextDisabled = currentPage === totalPage;
+    const expectedNextUrl = new URL(window.location.href);
+    expectedNextUrl.searchParams.set("page", (currentPage + 1).toString());
+    const expectedPrevUrl = new URL(window.location.href);
+    expectedPrevUrl.searchParams.set("page", (currentPage - 1).toString());
 
     return (
-        <Pagination className="flex justify-end mt-4">
+        <Pagination className="flex w-full justify-end mt-4">
             <PaginationContent>
                 <PaginationItem>
                     <PaginationPrevious
-                        href={isPrevDisabled ? "#" : prevUrl}
+                        href={isPrevDisabled ? "#" : expectedPrevUrl.toString()}
                         className={cn(
                             isPrevDisabled && "pointer-events-none opacity-50",
                         )}
@@ -718,11 +723,12 @@ export const PaginatorBuilder = ({
 
                     const pageNum = page as number;
                     const isActive = pageNum === currentPage;
-
+                    const eachPageUrl = new URL(window.location.href);
+                    eachPageUrl.searchParams.set("page", pageNum.toString());
                     return (
                         <PaginationItem key={pageNum}>
-                            <a
-                                href={`?page=${pageNum}`}
+                            <Link
+                                href={eachPageUrl.toString()}
                                 className={cn(
                                     "flex h-9 w-9 items-center justify-center rounded-md text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
                                     isActive &&
@@ -730,14 +736,14 @@ export const PaginatorBuilder = ({
                                 )}
                             >
                                 {pageNum}
-                            </a>
+                            </Link>
                         </PaginationItem>
                     );
                 })}
 
                 <PaginationItem>
                     <PaginationNext
-                        href={isNextDisabled ? "#" : nextUrl}
+                        href={isNextDisabled ? "#" : expectedNextUrl.toString()}
                         className={cn(
                             isNextDisabled && "pointer-events-none opacity-50",
                         )}
@@ -824,7 +830,7 @@ export function RichTextEditorInput({
                             {
                                 image: base64,
                                 filename: `questionnaire_${Date.now()}`,
-                            }
+                            },
                         );
 
                         if (response.data?.success) {
@@ -839,14 +845,14 @@ export function RichTextEditorInput({
                                 quill.insertEmbed(
                                     index,
                                     "image",
-                                    response.data.url
+                                    response.data.url,
                                 );
                                 quill.setSelection(index + 1, 0);
                             }
                         } else {
                             alert(
                                 "Gagal mengupload gambar: " +
-                                    (response.data?.message || "Unknown error")
+                                    (response.data?.message || "Unknown error"),
                             );
                         }
                     } catch (error: any) {
@@ -883,7 +889,7 @@ export function RichTextEditorInput({
         return Array.from(images)
             .map((img) => img.src)
             .filter(
-                (src) => src && src.includes("/assets/questionnaire_imgs/")
+                (src) => src && src.includes("/assets/questionnaire_imgs/"),
             );
     }, []);
 
@@ -897,7 +903,7 @@ export function RichTextEditorInput({
 
                 // Find deleted images
                 const deletedImages = previousImages.filter(
-                    (url) => !currentImages.includes(url)
+                    (url) => !currentImages.includes(url),
                 );
 
                 // Delete images from server (don't await to avoid blocking the UI)
@@ -910,7 +916,7 @@ export function RichTextEditorInput({
                         console.error(
                             "Failed to delete image from server:",
                             imageUrl,
-                            error
+                            error,
                         );
                         // Silently fail - the image will remain on server but that's acceptable
                     }
@@ -925,7 +931,7 @@ export function RichTextEditorInput({
                 onChange(newContent);
             }
         },
-        [previousContent, onChange, extractImageUrls]
+        [previousContent, onChange, extractImageUrls],
     );
 
     // Handle key events for better deletion detection
@@ -958,13 +964,13 @@ export function RichTextEditorInput({
                                         "/questionnaire/delete-image",
                                         {
                                             data: { src: imgSrc },
-                                        }
+                                        },
                                     );
                                 } catch (error) {
                                     console.error(
                                         "Failed to delete image from server:",
                                         imgSrc,
-                                        error
+                                        error,
                                     );
                                     // Silently fail - the image will remain on server but that's acceptable
                                 }
@@ -1007,7 +1013,7 @@ export function RichTextEditorInput({
                 },
             },
         }),
-        [imageHandler]
+        [imageHandler],
     );
 
     const formats = React.useMemo(
@@ -1030,14 +1036,14 @@ export function RichTextEditorInput({
             "align",
             "code-block",
         ],
-        []
+        [],
     );
 
     const editorStyles = React.useMemo(
         () => ({
             minHeight: `${height}px`,
         }),
-        [height]
+        [height],
     );
 
     const quillStyles = React.useMemo(
@@ -1046,7 +1052,7 @@ export function RichTextEditorInput({
             display: "flex",
             flexDirection: "column" as const,
         }),
-        []
+        [],
     );
 
     return (

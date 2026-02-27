@@ -15,6 +15,7 @@ import ConfirmDialog from "@/components/custom/ConfirmDialog";
 import { CircleCheck, CircleX, Pencil, Plus, Trash2 } from "lucide-react";
 import EmptyTable from "@/components/custom/EmptyTable";
 import { ymdToIdDate } from "@/components/helper/helper";
+import { PaginatorBuilder } from "@/components/custom/FormElement";
 
 const QuestionnaireIndex = ({
     title,
@@ -28,7 +29,7 @@ const QuestionnaireIndex = ({
         <AppLayout>
             <div className="flex justify-between items-center">
                 <PageTitle title={title} description={description} />
-                <Link href={"/admin/questionnaire/create"}>
+                {/*<Link href={"/admin/questionnaire/create"}>
                     <Button
                         variant={"yellow"}
                         className="flex items-center gap-2"
@@ -36,7 +37,7 @@ const QuestionnaireIndex = ({
                         <Plus />
                         <span>Tambah Kuesioner</span>
                     </Button>
-                </Link>
+                </Link>*/}
             </div>
 
             <div className="rounded-md border">
@@ -137,6 +138,19 @@ const QuestionnaireIndex = ({
                         )}
                     </TableBody>
                 </Table>
+            </div>
+            <div className="flex flex-col lg:flex-row justify-between items-center mt-3">
+                <p className="text-sm w-full">
+                    Total {questionnaires.total} Data
+                </p>
+                {questionnaires.total > questionnaires.per_page && (
+                    <PaginatorBuilder
+                        prevUrl={questionnaires.prev_page_url ?? "#"}
+                        nextUrl={questionnaires.next_page_url ?? "#"}
+                        currentPage={questionnaires.current_page}
+                        totalPage={questionnaires.last_page}
+                    />
+                )}
             </div>
         </AppLayout>
     );

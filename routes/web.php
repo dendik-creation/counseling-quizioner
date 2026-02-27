@@ -148,10 +148,14 @@ Route::prefix("admin")
                 Route::get("/", [AdminResultController::class, "index"])->name(
                     "index",
                 );
-                Route::get("/{id}", [
+                Route::get("/part-{participant_id}/quiz-{questionnaire_id}", [
                     AdminResultController::class,
-                    "show",
-                ])->name("show");
+                    "showParticipantResults",
+                ])->name("show.participant");
+                Route::get("/part-{participant_id}/res-{result_id}", [
+                    AdminResultController::class,
+                    "showParticipantResultDetail",
+                ])->name("show.participant");
                 Route::delete("/{id}", [
                     AdminResultController::class,
                     "destroy",

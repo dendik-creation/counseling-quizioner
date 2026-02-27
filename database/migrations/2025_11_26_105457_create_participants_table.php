@@ -10,13 +10,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        // Currently active data (not snapshot)
         Schema::create("participants", function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("origin_id")->nullable();
             $table->string("unique_code"); // nis/nisn for students, id number for common
             $table->string("name");
-            $table->string("class")->nullable(); // For students
-            $table->string("work")->nullable(); // For Common
+            $table->string("work")->nullable();
+            $table->string("class")->nullable();
             $table->timestamps();
             $table
                 ->foreign("origin_id")

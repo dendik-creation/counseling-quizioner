@@ -16,8 +16,25 @@ class UserSeed extends Seeder
     {
         User::create([
             "username" => "admin",
-            "name" => "Administrator",
+            "name" => "Abulabu",
             "level" => 1,
+            "password" => Hash::make(config("custom.default.user_password")),
+        ]);
+
+        User::create([
+            "username" => "akmal",
+            "name" => "Akmal Kudus",
+            "level" => 2,
+            "password" => Hash::make(config("custom.default.user_password")),
+        ]);
+
+        User::create([
+            "username" => "guruku",
+            "name" => "Guruku",
+            "level" => 3,
+            "origin_id" => 1,
+            "mgbk_id" => 2,
+            "is_active" => null,
             "password" => Hash::make(config("custom.default.user_password")),
         ]);
     }

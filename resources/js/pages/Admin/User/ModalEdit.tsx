@@ -31,6 +31,8 @@ const AdminUserEdit = ({ user }: { user: User }) => {
         username: user.username || "",
         name: user.name || "",
         level: user.level || "",
+        is_active:
+            user.is_active == null ? "" : user.is_active ? "true" : "false",
     });
 
     const handleChangeInput = (key: keyof typeof data, value: string) => {
@@ -152,6 +154,36 @@ const AdminUserEdit = ({ user }: { user: User }) => {
                             {errors.level && (
                                 <ErrorInput error={errors.level} />
                             )}
+                        </div>
+                        <div className="flex flex-col w-full">
+                            <label className="text-base mb-1">
+                                Status Aktif
+                            </label>
+                            <div className="">
+                                <SelectSearchInput
+                                    placeholder="Pilih Keaktifan"
+                                    options={[
+                                        {
+                                            label: "Aktif",
+                                            value: "true",
+                                        },
+                                        {
+                                            label: "Nonaktif",
+                                            value: "false",
+                                        },
+                                    ]}
+                                    value={data.is_active.toString() || ""}
+                                    onChange={(value) =>
+                                        handleChangeInput(
+                                            "is_active",
+                                            value.toString(),
+                                        )
+                                    }
+                                    removeValue={() =>
+                                        handleChangeInput("is_active", "")
+                                    }
+                                />
+                            </div>
                         </div>
                     </div>
                 </DialogHeader>

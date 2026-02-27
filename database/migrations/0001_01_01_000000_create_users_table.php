@@ -16,9 +16,19 @@ return new class extends Migration {
             $table->string("name");
             $table->integer("level");
             $table->string("password");
+            $table->boolean("is_active")->nullable()->default(true);
+            $table->unsignedBigInteger("origin_id")->nullable();
+            $table->unsignedBigInteger("mgbk_id")->nullable();
             $table
-                ->enum("active_status", ["pending", "active", "rejected"])
-                ->default("active");
+                ->foreign("origin_id")
+                ->references("id")
+                ->on("origins")
+                ->nullOnDelete();
+            $table
+                ->foreign("mgbk_id")
+                ->references("id")
+                ->on("users")
+                ->nullOnDelete();
             $table->timestamps();
         });
 

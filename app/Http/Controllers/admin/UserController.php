@@ -68,7 +68,14 @@ class UserController extends Controller
             "name" => "required|max:255",
             "username" => "required|max:255|unique:users,username," . $user->id,
             "level" => "required",
+            "is_active" => "nullable|string|in:true,false",
         ]);
+
+        $validated["is_active"] = ($validated["is_active"] == null
+                ? null
+                : $validated["is_active"] == "true")
+            ? true
+            : false;
 
         $user->update($validated);
         Session::flash("success", "User berhasil diperbarui.");

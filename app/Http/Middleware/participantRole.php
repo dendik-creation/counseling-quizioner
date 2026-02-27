@@ -15,8 +15,10 @@ class participantRole
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!session()->has('participant_id')) {
-            return redirect()->route('register')->with('error', 'Silakan registrasi terlebih dahulu.');
+        if (!session()->has("participant_id")) {
+            return redirect()
+                ->route("auth.register.index")
+                ->with("error", "Silakan registrasi terlebih dahulu.");
         }
 
         return $next($request);

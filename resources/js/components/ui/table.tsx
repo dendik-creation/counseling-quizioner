@@ -4,20 +4,34 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
-    return (
-        <div
-            data-slot="table-container"
-            className="relative w-full overflow-x-auto"
-        >
+const Table = React.forwardRef<
+    HTMLTableElement,
+    React.HTMLAttributes<HTMLTableElement> & {
+        noWrapper?: boolean;
+        divClassname?: string;
+    }
+>(({ className, noWrapper, divClassname, ...props }, ref) => {
+    if (noWrapper) {
+        return (
             <table
-                data-slot="table"
+                ref={ref}
+                className={cn("w-full caption-bottom text-sm", className)}
+                {...props}
+            />
+        );
+    }
+
+    return (
+        <div className={cn("relative w-full overflow-auto", divClassname)}>
+            <table
+                ref={ref}
                 className={cn("w-full caption-bottom text-sm", className)}
                 {...props}
             />
         </div>
     );
-}
+});
+Table.displayName = "Table";
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
     return (

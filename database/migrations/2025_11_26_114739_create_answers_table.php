@@ -12,20 +12,15 @@ return new class extends Migration {
     {
         Schema::create("answers", function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("participant_id");
-            $table->unsignedBigInteger("questionnaire_id");
+            $table->unsignedBigInteger("result_id");
             $table->unsignedBigInteger("question_id");
             $table->unsignedBigInteger("choice_id");
             $table
-                ->foreign("participant_id")
+                ->foreign("result_id")
                 ->references("id")
-                ->on("participants")
+                ->on("results")
                 ->onDelete("cascade");
-            $table
-                ->foreign("questionnaire_id")
-                ->references("id")
-                ->on("questionnaires")
-                ->onDelete("cascade");
+
             $table
                 ->foreign("question_id")
                 ->references("id")

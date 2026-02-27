@@ -174,14 +174,19 @@ const AdminParticipantIndex = ({
                     </TableBody>
                 </Table>
             </div>
-            {participants.total > participants.per_page && (
-                <PaginatorBuilder
-                    prevUrl={participants.prev_page_url ?? "#"}
-                    nextUrl={participants.next_page_url ?? "#"}
-                    currentPage={participants.current_page}
-                    totalPage={participants.last_page}
-                />
-            )}
+            <div className="flex flex-col lg:flex-row justify-between items-center mt-3">
+                <p className="text-sm w-full">
+                    Total {participants.total} Data
+                </p>
+                {participants.total > participants.per_page && (
+                    <PaginatorBuilder
+                        prevUrl={participants.prev_page_url ?? "#"}
+                        nextUrl={participants.next_page_url ?? "#"}
+                        currentPage={participants.current_page}
+                        totalPage={participants.last_page}
+                    />
+                )}
+            </div>
         </AppLayout>
     );
 };

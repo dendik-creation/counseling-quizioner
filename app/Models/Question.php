@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     protected $guarded = ["id"];
+    protected $casts = [
+        "questionnaire_id" => "integer",
+    ];
 
     public function questionnaire()
     {
