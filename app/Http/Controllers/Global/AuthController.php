@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+
 class AuthController extends Controller
 {
     private function redirectDashboardByLevel($level)
@@ -56,14 +57,14 @@ class AuthController extends Controller
         if ($user->is_active === 0) {
             return back()->withErrors([
                 "message" =>
-                    "Akun Anda dinonaktifkan. Hubungi MGBK atau Admin terkait",
+                "Akun Anda dinonaktifkan. Hubungi MGBK atau Admin terkait",
             ]);
         }
 
         if (is_null($user->is_active)) {
             return back()->withErrors([
                 "message" =>
-                    "Akun ada perlu diverifikasi oleh MGBK atau Admin. Tunggu beberapa waktu",
+                "Akun ada perlu diverifikasi oleh MGBK atau Admin. Tunggu beberapa waktu",
             ]);
         }
 
@@ -94,7 +95,7 @@ class AuthController extends Controller
             return redirect()->route("guide");
         }
 
-        $origins = Origin::all();
+        $origins = Origin::where('type', 'SCHOOL')->get();
         $origins = $origins->map(function ($origin) {
             return [
                 "value" => $origin->id,
@@ -111,29 +112,40 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             "name" => "required",
-            "unique_code" => "required",
-            "origin_id" => "required|exists:origins,id",
-            "token" => "required",
+            "username" => "required",
+            "password" => "required",
+            "confirm_password" => "required",
+            "origin_status" => "required",
         ]);
 
-        $questionnaires = Questionnaire::where("access_token", $request->token)
-            ->where("expires_at", ">=", now())
-            ->first();
-        if (!$questionnaires) {
+        if (!$request->origin_status) {
+            $request->validate([
+                "origin_id" => "required|exists:origins,id",
+            ]);
+
+            $origin_id = $request->origin_id;
+        } else {
+            $request->validate([
+                "origin_name" => "required",
+            ]);
+
+            $origin = Origin::create(['name' => $request->origin_name, 'type' => 'SCHOOL']);
+            $origin_id = $origin->id;
+        }
+
+        $user = User::where('username', $request->username)->first();
+        if ($user) {
+            Session::flash("error", "Username sudah terdaftar");
             return back()->withErrors([
-                "message" => "Token tidak ditemukan / expired",
+                "message" =>
+                "Username sudah terdaftar",
             ]);
         }
 
-        $participant = Participant::create($data);
-        session([
-            "token" => $request->token,
-            "participant_id" => $participant->id,
-            "questionnaires_id" => $questionnaires->id,
-        ]);
+        User::create(['name' => $request->name, 'username' => $request->username, 'password' => Hash::make($request->password), 'level' => 3, 'origin_id' => $origin_id, 'is_active' => null]);
 
         Session::flash("success", "Registrasi berhasil");
-        return Inertia::location("/guide");
+        return Inertia::location("/");
     }
 
     public function unregisterStore()

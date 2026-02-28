@@ -12,16 +12,16 @@ import { ErrorInput, SelectSearchInput } from "@/components/custom/FormElement";
 import { Toaster } from "react-hot-toast";
 import BlastToaster from "@/components/custom/BlastToaster";
 import {
-    DoorOpen,
-    GraduationCap,
     Loader,
     LogIn,
     User,
-    BriefcaseBusiness,
     KeyRound,
-    Hash,
+    UserCog,
+    ShieldCheck,
+    Building2,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Switch } from "@/components/ui/switch";
 
 export default function Registration({
     app_name,
@@ -31,13 +31,15 @@ export default function Registration({
     origins: any[];
 }) {
     const { flash } = usePage().props as any;
+    const [isManualOrigin, setIsManualOrigin] = useState(false);
     const { data, setData, post, processing, errors, setError } = useForm({
         name: "",
-        unique_code: "",
-        class: "",
-        work: "",
+        username: "",
+        password: "",
+        confirm_password: "",
+        origin_status: false,
         origin_id: "",
-        token: "",
+        origin_name: "",
     });
 
     useEffect(() => {
@@ -54,39 +56,64 @@ export default function Registration({
         }
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!data.name) setError("name", "Masukkan nama lengkap");
-        if (!data.unique_code) setError("unique_code", "Masukkan kode unik");
-        if (!data.origin_id) setError("origin_id", "Pilih asal peserta");
-        if (!data.token) setError("token", "Masukkan token");
-        if (!data.name || !data.unique_code || !data.origin_id || !data.token)
+
+        if (!data.name) setError("name", "Masukkan nama");
+        if (!data.username) setError("username", "Masukkan username");
+        if (!data.password) setError("password", "Masukkan password");
+        if (data.password.length < 6)
+            setError("password", "Password harus lebih dari 6 karakter");
+        if (!data.confirm_password)
+            setError("confirm_password", "Masukkan confirm password");
+        if (data.confirm_password.length < 6)
+            setError(
+                "confirm_password",
+                "Confirm Password harus lebih dari 6 karakter",
+            );
+        if (data.password !== data.confirm_password)
+            setError("confirm_password", "Password tidak sama");
+        if (!isManualOrigin && !data.origin_id)
+            setError("origin_id", "Pilih instansi");
+        if (isManualOrigin && !data.origin_name)
+            setError("origin_name", "Isi nama instansi");
+        if (
+            !data.name ||
+            !data.username ||
+            !data.password ||
+            !data.confirm_password ||
+            data.password !== data.confirm_password ||
+            (!isManualOrigin && !data.origin_id) ||
+            (isManualOrigin && !data.origin_name)
+        )
             return;
 
         post("/auth/register", {
-            preserveScroll: true,
+            // data: {
+            //     ...data,
+            //     confirm_password: undefined,
+            //     origin_id: isManualOrigin ? null : data.origin_id,
+            // },
+            // preserveScroll: true,
             replace: true,
-            onError: (errors) => {
-                return BlastToaster("error", errors.message);
-            },
         });
     };
 
     return (
         <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-background">
             <Toaster position={"bottom-right"} reverseOrder={false} />
-            <Card className="w-full max-w-7xl shadow-md mx-4 flex flex-col md:flex-row">
+            <Card className="w-full max-w-xl shadow-md mx-4 flex flex-col md:flex-row">
                 <div className="w-full flex flex-col justify-center p-6">
                     <CardHeader className="p-0 mb-4">
                         <CardTitle className="text-center font-bold text-2xl">
                             Registrasi
                         </CardTitle>
                         <CardDescription className="text-center">
-                            Masukkan data diri Anda untuk mengikuti tes
+                            Masukkan data diri Anda untuk akses Guru
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <div className="p-4 mb-4 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm flex gap-3">
+                        <div className="p-4 mb-5 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm flex gap-3">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 className="w-5 h-5 mt-0.5 text-yellow-600"
@@ -104,22 +131,16 @@ export default function Registration({
 
                             <div>
                                 <span className="font-semibold">Catatan: </span>
-                                Jika Anda{" "}
-                                <span className="font-semibold">pelajar</span>,
-                                isi bagian{" "}
-                                <span className="font-semibold">Kelas</span>.
-                                Jika Anda{" "}
-                                <span className="font-semibold">
-                                    masyarakat umum
-                                </span>
-                                , isi bagian{" "}
-                                <span className="font-semibold">Pekerjaan</span>
-                                . Isi sesuai kategori Anda.
+                                Jika Instansi tidak ditemukan, anda dapat
+                                memasukkan secara manual.
                             </div>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="relative">
+                                <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                    Nama Lengkap
+                                </label>
                                 <div className="flex items-center">
                                     <span className="absolute left-3 text-gray-500">
                                         <User />
@@ -141,131 +162,186 @@ export default function Registration({
                                     <ErrorInput error={errors.name} />
                                 )}
                             </div>
-
                             <div className="relative">
+                                <div className="flex justify-between">
+                                    <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                        Instansi
+                                    </label>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch
+                                            checked={isManualOrigin}
+                                            onCheckedChange={(value) => {
+                                                setIsManualOrigin(value);
+
+                                                setData("origin_status", value);
+                                                setData("origin_id", "");
+                                                setData("origin_name", "");
+                                            }}
+                                        />
+                                        <label className="text-base">
+                                            Instansi tidak terdaftar
+                                        </label>
+                                    </div>
+                                </div>
                                 <div className="flex items-center">
                                     <span className="absolute left-3 text-gray-500">
-                                        <Hash />
+                                        <Building2 />
+                                    </span>
+
+                                    {!isManualOrigin && (
+                                        <>
+                                            <SelectSearchInput
+                                                placeholder="Pilih Instansi"
+                                                options={origins}
+                                                value={data.origin_id}
+                                                removeValue={() =>
+                                                    setData("origin_id", "")
+                                                }
+                                                onChange={(value) =>
+                                                    setData(
+                                                        "origin_id",
+                                                        String(value),
+                                                    )
+                                                }
+                                                className={`pl-10 py-3 ${
+                                                    errors.origin_id
+                                                        ? "border-red-500"
+                                                        : ""
+                                                }`}
+                                            />{" "}
+                                        </>
+                                    )}
+
+                                    {isManualOrigin && (
+                                        <>
+                                            <Input
+                                                placeholder="Nama Instansi"
+                                                className={`pl-10 py-6 ${
+                                                    errors.origin_name
+                                                        ? "border-red-500"
+                                                        : ""
+                                                }`}
+                                                value={data.origin_name}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "origin_name",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </>
+                                    )}
+                                </div>
+                                {!isManualOrigin && (
+                                    <>
+                                        {errors.origin_id && (
+                                            <ErrorInput
+                                                error={errors.origin_id}
+                                            />
+                                        )}
+                                    </>
+                                )}
+
+                                {isManualOrigin && (
+                                    <>
+                                        {errors.origin_name && (
+                                            <ErrorInput
+                                                error={errors.origin_name}
+                                            />
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            <div className="relative">
+                                <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                    Username
+                                </label>
+                                <div className="flex items-center">
+                                    <span className="absolute left-3 text-gray-500">
+                                        <UserCog />
                                     </span>
                                     <Input
                                         type="text"
-                                        placeholder="Kode Unik"
+                                        placeholder="Username"
                                         autoFocus={true}
-                                        value={data.unique_code}
+                                        value={data.username}
+                                        onChange={(e) =>
+                                            setData("username", e.target.value)
+                                        }
+                                        className={`pl-10 py-6 ${
+                                            errors.username
+                                                ? "border-red-500"
+                                                : ""
+                                        }`}
+                                    />
+                                </div>
+                                {errors.username && (
+                                    <ErrorInput error={errors.username} />
+                                )}
+                            </div>{" "}
+                            <div className="relative">
+                                <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                    Password
+                                </label>
+                                <div className="flex items-center">
+                                    <span className="absolute left-3 text-gray-500">
+                                        <KeyRound />
+                                    </span>
+                                    <Input
+                                        type="password"
+                                        placeholder="Password"
+                                        autoFocus={true}
+                                        value={data.password}
+                                        onChange={(e) =>
+                                            setData("password", e.target.value)
+                                        }
+                                        className={`pl-10 py-6 ${
+                                            errors.password
+                                                ? "border-red-500"
+                                                : ""
+                                        }`}
+                                    />
+                                </div>
+                                {errors.password && (
+                                    <ErrorInput error={errors.password} />
+                                )}
+                            </div>{" "}
+                            <div className="relative">
+                                <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                    Confirm Password
+                                </label>
+                                <div className="flex items-center">
+                                    <span className="absolute left-3 text-gray-500">
+                                        <ShieldCheck />
+                                    </span>
+                                    <Input
+                                        type="password"
+                                        placeholder="Confirm Password"
+                                        autoFocus={true}
+                                        value={data.confirm_password}
                                         onChange={(e) =>
                                             setData(
-                                                "unique_code",
+                                                "confirm_password",
                                                 e.target.value,
                                             )
                                         }
                                         className={`pl-10 py-6 ${
-                                            errors.unique_code
+                                            errors.confirm_password
                                                 ? "border-red-500"
                                                 : ""
                                         }`}
                                     />
                                 </div>
-                                {errors.unique_code && (
-                                    <ErrorInput error={errors.unique_code} />
-                                )}
-                            </div>
-
-                            <div className="relative">
-                                <div className="flex items-center">
-                                    <span className="absolute left-3 text-gray-500">
-                                        <GraduationCap />
-                                    </span>
-                                    <SelectSearchInput
-                                        placeholder="Pilih Asal Peserta"
-                                        options={origins}
-                                        value={data.origin_id}
-                                        removeValue={() =>
-                                            setData("origin_id", "")
-                                        }
-                                        onChange={(value) =>
-                                            setData("origin_id", String(value))
-                                        }
-                                        className={`pl-10 py-3 ${
-                                            errors.origin_id
-                                                ? "border-red-500"
-                                                : ""
-                                        }`}
+                                {errors.confirm_password && (
+                                    <ErrorInput
+                                        error={errors.confirm_password}
                                     />
-                                </div>
-                                {errors.origin_id && (
-                                    <ErrorInput error={errors.origin_id} />
                                 )}
                             </div>
-
-                            <div className="relative">
-                                <div className="flex items-center">
-                                    <span className="absolute left-3 text-gray-500">
-                                        <DoorOpen />
-                                    </span>
-                                    <Input
-                                        type="text"
-                                        placeholder="Kelas"
-                                        value={data.class}
-                                        onChange={(e) =>
-                                            setData("class", e.target.value)
-                                        }
-                                        className={`pl-10 py-6 ${
-                                            errors.class ? "border-red-500" : ""
-                                        }`}
-                                    />
-                                </div>
-                                {errors.class && (
-                                    <ErrorInput error={errors.class} />
-                                )}
-                            </div>
-
-                            <div className="relative">
-                                <div className="flex items-center">
-                                    <span className="absolute left-3 text-gray-500">
-                                        <BriefcaseBusiness />
-                                    </span>
-                                    <Input
-                                        type="text"
-                                        placeholder="Pekerjaan"
-                                        value={data.work}
-                                        onChange={(e) =>
-                                            setData("work", e.target.value)
-                                        }
-                                        className={`pl-10 py-6 ${
-                                            errors.work ? "border-red-500" : ""
-                                        }`}
-                                    />
-                                </div>
-                                {errors.work && (
-                                    <ErrorInput error={errors.work} />
-                                )}
-                            </div>
-
-                            <div className="relative">
-                                <span className="absolute left-3 top-3 text-gray-500">
-                                    <KeyRound />
-                                </span>
-                                <Input
-                                    type="text"
-                                    placeholder="Token Registrasi"
-                                    value={data.token}
-                                    onChange={(e) =>
-                                        setData("token", e.target.value)
-                                    }
-                                    className={`pl-10 py-6 ${
-                                        errors.token ? "border-red-500" : ""
-                                    }`}
-                                />
-
-                                {errors.token && (
-                                    <ErrorInput error={errors.token} />
-                                )}
-                            </div>
-
                             <Button
                                 type="submit"
                                 variant={"yellow"}
-                                className="w-full p-6"
+                                className="w-full p-6 MT-6"
                                 disabled={processing}
                             >
                                 {processing ? (

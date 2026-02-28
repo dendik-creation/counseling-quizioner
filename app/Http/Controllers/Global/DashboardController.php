@@ -46,11 +46,11 @@ class DashboardController extends Controller
         $monthlyTrend = (clone $baseQ)
             ->where('completed_at', '>=', $from12)
             ->select(
-                DB::raw("strftime('%Y-%m', completed_at) as month"),
+                DB::raw("DATE_FORMAT('%Y-%m', completed_at) as month"),
                 DB::raw('COUNT(*) as total'),
                 DB::raw('ROUND(AVG(gus_point + ji_point + gang_point), 1) as avg_total_score')
             )
-            ->groupBy(DB::raw("strftime('%Y-%m', completed_at)"))
+            ->groupBy(DB::raw("DATE_FORMAT('%Y-%m', completed_at)"))
             ->orderBy('month')
             ->get()
             ->map(fn($r) => [
