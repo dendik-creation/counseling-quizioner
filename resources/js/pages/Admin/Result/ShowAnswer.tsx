@@ -9,6 +9,7 @@ import {
     ChartColumnBig,
     ClipboardCheck,
     Eye,
+    Printer,
     Table2Icon,
 } from "lucide-react";
 import { Participant } from "@/types/participant";
@@ -87,7 +88,21 @@ const AdminParticipantResultShowAnswer = ({
     };
     return (
         <AppLayout>
-            <PageTitle title={title} description={description} />
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4">
+                <PageTitle title={title} description={description} />
+                <Link
+                    className="w-full lg:w-fit"
+                    href={`/admin/results/part-${result.participant_id}/res-${result.id}/print`}
+                >
+                    <Button
+                        variant="outline"
+                        className="flex items-center w-full lg:w-fit gap-2"
+                    >
+                        <Printer className="w-4 h-4" />
+                        Cetak
+                    </Button>
+                </Link>
+            </div>
             <div className="flex mb-4 items-center gap-2">
                 <BadgeInfoIcon className="text-slate-400" />
                 <span className="text-sm">

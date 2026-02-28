@@ -12,6 +12,7 @@ use App\Http\Controllers\admin\UserController as AdminUserController;
 use App\Http\Controllers\admin\OriginController as AdminOriginController;
 use App\Http\Controllers\admin\ParticipantController as AdminParticipantController;
 use App\Http\Controllers\admin\ResultController as AdminResultController;
+use App\Http\Controllers\admin\ReportController as AdminReportController;
 
 Route::get("/", [AuthController::class, "signedInStatus"])->name("login");
 Route::prefix("auth")->group(function () {
@@ -152,14 +153,30 @@ Route::prefix("admin")
                     AdminResultController::class,
                     "showParticipantResults",
                 ])->name("show.participant");
+                Route::get("/part-{participant_id}/quiz-{questionnaire_id}/print", [
+                    AdminResultController::class,
+                    "printParticipantResults",
+                ])->name("print.participant");
                 Route::get("/part-{participant_id}/res-{result_id}", [
                     AdminResultController::class,
                     "showParticipantResultDetail",
                 ])->name("show.participant");
-                Route::delete("/{id}", [
+                Route::get("/part-{participant_id}/res-{result_id}/print", [
                     AdminResultController::class,
-                    "destroy",
-                ])->name("destroy");
+                    "printParticipantResultDetail",
+                ])->name("print.participant");
+            });
+        
+            // Report Routes
+        Route::prefix("reports")
+            ->name("admin.reports.")
+            ->group(function () {
+                Route::get("/", [AdminReportController::class, "index"])->name(
+                    "index",
+                );
+                Route::get("/print", [AdminReportController::class, "printPDF"])->name(
+                    "print",
+                );
             });
     });
 

@@ -2,7 +2,13 @@ import AppLayout from "@/partials/AppLayout";
 import { PageTitle } from "@/Partials/PageTitle";
 import { PageTitleProps } from "@/types/global";
 import { Result } from "@/types/result";
-import { BookUser, ChartColumnBig, ClipboardCheck, Eye } from "lucide-react";
+import {
+    BookUser,
+    ChartColumnBig,
+    ClipboardCheck,
+    Eye,
+    Printer,
+} from "lucide-react";
 import { Participant } from "@/types/participant";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -96,7 +102,21 @@ const AdminParticipantResultsShow = ({
 
     return (
         <AppLayout>
-            <PageTitle title={title} description={description} />
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4">
+                <PageTitle title={title} description={description} />
+                <Link
+                    className="w-full lg:w-fit"
+                    href={`/admin/results/part-${participant.id}/quiz-${results[0].questionnaire_id}/print`}
+                >
+                    <Button
+                        variant="outline"
+                        className="flex items-center w-full lg:w-fit gap-2"
+                    >
+                        <Printer className="w-4 h-4" />
+                        Cetak
+                    </Button>
+                </Link>
+            </div>
             <div className="grid gap-6 grid-cols-3">
                 {/*Participant Current Info*/}
                 <Card className="py-3 col-span-3 lg:col-span-1">

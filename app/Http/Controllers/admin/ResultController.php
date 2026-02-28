@@ -176,4 +176,59 @@ class ResultController extends Controller
             "available_choices" => $available_choices,
         ]);
     }
+
+    public function printParticipantResults(Request $request, $participant_id, $questionnaire_id)
+    {
+        $results = Result::with('participant', 'origin', 'questionnaire')
+            ->where('participant_id', $participant_id)
+            ->where('questionnaire_id', $questionnaire_id)
+            ->latest()
+            ->get();
+
+        if ($results->count() == 0) {
+            return redirect()->route('admin.results.index')
+                ->with('error', 'Hasil kuisioner tidak ditemukan');
+        }
+
+        return Inertia::render('Admin/Result/PrintShow', [
+            'title'       => 'Cetak Histori Kuisioner',
+            'description' => 'Histori pengerjaan kuisioner partisipan',
+            'results'     => $results,
+            'participant' => $results->first()->participant->load('origin'),
+        ]);
+    }
+
+    public function printParticipantResultDetail(Request $request, $participant_id, $result_id)
+    {
+        $result = Result::where('id', $result_id)
+            ->where('participant_id', $participant_id)
+            ->with([
+                'participant:id,name',
+                'origin:id,name,type',
+                'questionnaire:id,title',
+                'answers',
+            ])
+            ->first();
+
+        if (!$result) {
+            return redirect()->route('admin.results.index')
+                ->with('error', 'Jawaban kuisioner tidak ditemukan');
+        }
+
+        $result['try_step'] = Result::where('participant_id', $participant_id)
+            ->where('questionnaire_id', $result->questionnaire_id)
+            ->where('completed_at', '<=', $result->completed_at)
+            ->count();
+
+        $available_questions = Question::where('questionnaire_id', $result->questionnaire_id)->get();
+        $available_choices   = Choice::where('questionnaire_id', $result->questionnaire_id)->get();
+
+        return Inertia::render('Admin/Result/PrintAnswer', [
+            'title'               => 'Cetak Jawaban Kuisioner',
+            'description'         => 'Detail jawaban kuisioner partisipan',
+            'result'              => $result,
+            'available_questions' => $available_questions,
+            'available_choices'   => $available_choices,
+        ]);
+    }
 }
