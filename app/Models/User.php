@@ -12,6 +12,10 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
     protected $guarded = ["id"];
     protected $hidden = ["password"];
+    protected $casts = [
+        "origin_id" => "integer",
+        "mgbk_id" => "integer",
+    ];
     protected function casts(): array
     {
         return [

@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import SignoutMenu from "@/components/custom/SignoutMenu";
 import { humanizeLevelAsRole } from "@/components/helper/helper";
+import ProfileUpdateModal from "./ProfileUpdateModal";
+import ChangePasswordModal from "./ChangePasswordModal";
 interface AppHeaderProps {
     classNames?: string;
     name: string;
@@ -47,7 +49,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ classNames, name, level }) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end">
                     <DropdownMenuGroup>
-                        {/* Custom Dropdown Menu */}
+                        <ProfileUpdateModal />
+                        <ChangePasswordModal />
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <SignoutMenu />

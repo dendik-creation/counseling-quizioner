@@ -1,7 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import AppHeader from "@/partials/AppHeader";
-import AppFooter from "@/partials/AppFooter";
 import AppSidebar from "@/partials/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { usePage } from "@inertiajs/react";
@@ -40,7 +39,6 @@ export default function AppLayout({ children, className }: AppLayoutProps) {
                     <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">
                         {children}
                     </main>
-                    <AppFooter />
                 </div>
             </div>
         </SidebarProvider>

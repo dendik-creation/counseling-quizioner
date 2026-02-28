@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 // Global Controllers
 use App\Http\Controllers\global\AuthController;
+use App\Http\Controllers\global\ProfileController;
 //Anwers Controllers
 use App\Http\Controllers\Answer\AnswerController as AnswerController;
 // Admin Controllers
@@ -194,4 +195,22 @@ Route::middleware(["participant", "answering"])->group(function () {
             "answerStore",
         ]);
     });
+});
+
+// Global Routes
+Route::middleware("auth")->group(function () {
+    Route::put("/profile/update", [
+        ProfileController::class,
+        "profileUpdate",
+    ])->name("profile.update");
+
+    // Change Password
+    Route::post("/profile/check-password", [
+        ProfileController::class,
+        "checkPassword",
+    ])->name("profile.check-password");
+    Route::put("/profile/change-password", [
+        ProfileController::class,
+        "changePassword",
+    ])->name("profile.change-password");
 });
