@@ -15,8 +15,6 @@ return new class extends Migration {
             $table->string("name");
             $table->string("type");
             $table->string("city")->nullable();
-            $table->unsignedBigInteger("mgbk_id")->nullable();
-            $table->foreign("mgbk_id")->references("id")->on("users")->onDelete("cascade");
             $table->timestamps();
         });
     }
