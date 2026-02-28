@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string("name");
             $table->integer("level");
             $table->string("password");
-            $table->boolean("is_active")->nullable()->default(true);
+            $table->boolean("is_active")->nullable()->default(true); // null = pending activation
             $table->unsignedBigInteger("origin_id")->nullable();
             $table->unsignedBigInteger("mgbk_id")->nullable();
             $table

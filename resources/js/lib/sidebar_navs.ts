@@ -5,6 +5,8 @@ import {
     LucideProps,
     Users,
     ListTodo,
+    ClipboardCheck,
+    FileText,
 } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 
@@ -62,13 +64,13 @@ const adminNavs: NavItems = [
         type: "item",
         title: "Hasil Kuisioner",
         url: "/admin/results",
-        icon: ListTodo,
+        icon: ClipboardCheck,
     },
     {
         type: "item",
         title: "Laporan",
         url: "/admin/reports",
-        icon: ListTodo,
+        icon: FileText,
     },
 ];
 
@@ -78,6 +80,40 @@ const mgbkNavs: NavItems = [
         title: "Dashboard",
         url: "/mgbk/dashboard",
         icon: Grid2X2,
+    },
+    {
+        type: "splitter",
+        title: "Data Master",
+        url: "#",
+    },
+    {
+        type: "item",
+        title: "Data Asal",
+        url: "/admin/origins",
+        icon: Earth,
+    },
+    {
+        type: "item",
+        title: "Data Partisipan",
+        url: "/admin/participants",
+        icon: BookUser,
+    },
+    {
+        type: "splitter",
+        title: "Proses Kuisioner",
+        url: "#",
+    },
+    {
+        type: "item",
+        title: "Hasil Kuisioner",
+        url: "/admin/results",
+        icon: ClipboardCheck,
+    },
+    {
+        type: "item",
+        title: "Laporan",
+        url: "/admin/reports",
+        icon: FileText,
     },
 ];
 

@@ -181,6 +181,19 @@ Route::prefix("admin")
             });
     });
 
+// MGBK Routes
+Route::prefix("mgbk")
+    ->middleware("auth")
+    ->group(function () {
+        Route::get("/dashboard", [
+            DashboardController::class,
+            "mgbkIndex",
+        ])->name("mgbk.dashboard.index");
+    });
+
+
+
+
 // Kuisonair Routes
 Route::middleware(["participant", "answering"])->group(function () {
     Route::get("/guide", [AnswerController::class, "guide"])->name("guide");

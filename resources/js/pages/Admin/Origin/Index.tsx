@@ -25,6 +25,7 @@ const AdminOriginIndex = ({
     description,
     origins,
     search,
+    available_mgbk,
 }: AdminOriginIndexProps) => {
     const firstRender = useRef(true);
     const { data: filterData, setData: setFilterData } = useForm({
@@ -75,7 +76,7 @@ const AdminOriginIndex = ({
                         value={filterData.search || ""}
                     />
                 </div>
-                <AdminOriginCreate />
+                <AdminOriginCreate available_mgbk={available_mgbk} />
             </div>
 
             <div className="rounded-md border">
@@ -90,6 +91,12 @@ const AdminOriginIndex = ({
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Tipe
+                            </TableHead>
+                            <TableHead className="bg-stone-200 font-semibold">
+                                Kota
+                            </TableHead>
+                            <TableHead className="bg-stone-200 font-semibold">
+                                MGBK
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Jumlah Partisipan
@@ -107,6 +114,10 @@ const AdminOriginIndex = ({
                                 <TableCell>
                                     {humanizeOriginType(origin.type)}
                                 </TableCell>
+                                <TableCell>{origin.city ?? "-"}</TableCell>
+                                <TableCell>
+                                    {origin.mgbk?.name ?? "-"}
+                                </TableCell>
                                 <TableCell>
                                     <Link
                                         href={`/admin/participants?origin=${origin.id}`}
@@ -122,7 +133,10 @@ const AdminOriginIndex = ({
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <AdminOriginEdit origin={origin} />
+                                        <AdminOriginEdit
+                                            available_mgbk={available_mgbk}
+                                            origin={origin}
+                                        />
                                         <ConfirmDialog
                                             triggerNode={
                                                 <span>

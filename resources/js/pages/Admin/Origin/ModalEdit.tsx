@@ -12,6 +12,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { SelectOption } from "@/types/global";
 import { Origin } from "@/types/origin";
 import { useForm } from "@inertiajs/react";
 import {
@@ -24,7 +25,13 @@ import {
 } from "lucide-react";
 import React from "react";
 
-const AdminOriginEdit = ({ origin }: { origin: Origin }) => {
+const AdminOriginEdit = ({
+    origin,
+    available_mgbk,
+}: {
+    origin: Origin;
+    available_mgbk: SelectOption[];
+}) => {
     const {
         data,
         setData,
@@ -37,6 +44,8 @@ const AdminOriginEdit = ({ origin }: { origin: Origin }) => {
     } = useForm({
         name: origin.name || "",
         type: origin.type || "",
+        city: origin.city || "",
+        mgbk_id: origin.mgbk_id || "",
     });
 
     const handleChangeInput = (key: keyof typeof data, value: string) => {
@@ -52,6 +61,17 @@ const AdminOriginEdit = ({ origin }: { origin: Origin }) => {
         }
         if (!data.type || data.type.trim() === "") {
             setError("type", "Tipe asal wajib dipilih");
+            isValid = false;
+        }
+        if (data.type === "SCHOOL" && (!data.city || data.city.trim() === "")) {
+            setError("city", "Kota wajib diisi");
+            isValid = false;
+        }
+        if (
+            data.type === "SCHOOL" &&
+            (!data.mgbk_id || data.mgbk_id.toString().trim() === "")
+        ) {
+            setError("mgbk_id", "MGBK wajib dipilih");
             isValid = false;
         }
         return isValid;
@@ -128,6 +148,55 @@ const AdminOriginEdit = ({ origin }: { origin: Origin }) => {
                             </div>
                             {errors.type && <ErrorInput error={errors.type} />}
                         </div>
+                        {data.type === "SCHOOL" && (
+                            <div className="flex flex-col w-full">
+                                <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                    Kota
+                                </label>
+                                <Input
+                                    type="text"
+                                    placeholder="Masukkan Kota"
+                                    className="w-full"
+                                    disabled={processing}
+                                    value={data.city || ""}
+                                    onChange={(e) =>
+                                        handleChangeInput(
+                                            "city",
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+                                {errors.city && (
+                                    <ErrorInput error={errors.city} />
+                                )}
+                            </div>
+                        )}
+                        {data.type === "SCHOOL" && (
+                            <div className="flex flex-col w-full">
+                                <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                    MGBK
+                                </label>
+                                <div className="">
+                                    <SelectSearchInput
+                                        placeholder="Pilih MGBK"
+                                        options={available_mgbk}
+                                        value={data.mgbk_id.toString() || ""}
+                                        onChange={(value) =>
+                                            handleChangeInput(
+                                                "mgbk_id",
+                                                value.toString(),
+                                            )
+                                        }
+                                        removeValue={() =>
+                                            handleChangeInput("mgbk_id", "")
+                                        }
+                                    />
+                                </div>
+                                {errors.mgbk_id && (
+                                    <ErrorInput error={errors.mgbk_id} />
+                                )}
+                            </div>
+                        )}
                     </div>
                 </DialogHeader>
                 <DialogFooter className="mt-9">
