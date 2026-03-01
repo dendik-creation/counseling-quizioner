@@ -16,6 +16,11 @@ class Origin extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function counseling_teacher()
+    {
+        return $this->hasOne(User::class, 'origin_id');
+    }
+
     public function participants()
     {
         return $this->hasMany(Participant::class, "origin_id");

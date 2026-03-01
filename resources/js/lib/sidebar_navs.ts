@@ -39,7 +39,7 @@ const adminNavs: NavItems = [
     },
     {
         type: "item",
-        title: "Data Asal Institusi",
+        title: "Data Asal",
         url: "/admin/origins",
         icon: Earth,
     },
@@ -94,7 +94,7 @@ const mgbkNavs: NavItems = [
     },
     {
         type: "item",
-        title: "Data Asal Institusi",
+        title: "Data Asal",
         url: "/mgbk/origins",
         icon: Earth,
     },

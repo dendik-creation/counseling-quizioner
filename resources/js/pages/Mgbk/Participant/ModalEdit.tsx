@@ -101,7 +101,7 @@ const AdminParticipantEdit = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) return;
-        put(`/admin/participants/${participant.id}`, {
+        put(`/mgbk/participants/${participant.id}`, {
             replace: true,
             preserveState: true,
             only: ["participants"],

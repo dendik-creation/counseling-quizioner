@@ -14,8 +14,11 @@ use App\Http\Controllers\admin\OriginController as AdminOriginController;
 use App\Http\Controllers\admin\ParticipantController as AdminParticipantController;
 use App\Http\Controllers\admin\ResultController as AdminResultController;
 use App\Http\Controllers\admin\ReportController as AdminReportController;
-
+// MGBK Controllers
 use App\Http\Controllers\mgbk\UserController as MgbkUserController;
+use App\Http\Controllers\mgbk\OriginController as MgbkOriginController;
+use App\Http\Controllers\mgbk\ParticipantController as MgbkParticipantController;
+
 Route::get("/", [AuthController::class, "signedInStatus"])->name("login");
 Route::prefix("auth")->group(function () {
     Route::get("/signin", [AuthController::class, "signInView"])
@@ -101,10 +104,6 @@ Route::prefix("admin")
                     AdminParticipantController::class,
                     "index",
                 ])->name("index");
-                Route::post("/", [
-                    AdminParticipantController::class,
-                    "store",
-                ])->name("store");
                 Route::put("/{id}", [
                     AdminParticipantController::class,
                     "update",
@@ -202,6 +201,33 @@ Route::prefix("mgbk")
                     "active-status",
                 );
             }); 
+        
+        // Origin Routes
+        Route::prefix("origins")
+            ->name("mgbk.origins.")
+            ->group(function () {
+                Route::get("/", [MgbkOriginController::class, "index"])->name(
+                    "index",
+                );
+            });
+
+        // Participant Routes
+ Route::prefix("participants")
+            ->name("mgbk.participants.")
+            ->group(function () {
+                Route::get("/", [
+                    MgbkParticipantController::class,
+                    "index",
+                ])->name("index");
+                Route::put("/{id}", [
+                    MgbkParticipantController::class,
+                    "update",
+                ])->name("update");
+                Route::delete("/{id}", [
+                    MgbkParticipantController::class,
+                    "destroy",
+                ])->name("destroy");
+            });
     });
 
 
