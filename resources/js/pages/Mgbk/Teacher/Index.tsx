@@ -79,13 +79,13 @@ const MgbkTeacherIndex = ({ title, description, users, search }: PageProps) => {
                                 #
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Username
+                                Username (NIP)
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Nama
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Role
+                                Institusi
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Bergabung sejak
@@ -105,7 +105,7 @@ const MgbkTeacherIndex = ({ title, description, users, search }: PageProps) => {
                                 <TableCell>{user.username}</TableCell>
                                 <TableCell>{user.name}</TableCell>
                                 <TableCell>
-                                    {humanizeLevelAsRole(user.level.toString())}
+                                    {user.origin?.name ?? "-"}
                                 </TableCell>
                                 <TableCell>
                                     {ymdToIdDate(user.created_at)}
@@ -131,7 +131,7 @@ const MgbkTeacherIndex = ({ title, description, users, search }: PageProps) => {
                             </TableRow>
                         ))}
                         {users.data.length == 0 && (
-                            <EmptyTable colSpan={6} message="Guru tidak ada" />
+                            <EmptyTable colSpan={7} message="Guru tidak ada" />
                         )}
                     </TableBody>
                 </Table>

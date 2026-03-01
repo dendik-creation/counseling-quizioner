@@ -90,7 +90,7 @@ const AdminUserIndex = ({
                     <div className="">
                         <SelectSearchInput
                             className="w-full"
-                            placeholder="Pilih Role"
+                            placeholder="Filter Role"
                             value={filterData.level.toString() || ""}
                             options={[
                                 {
@@ -133,6 +133,9 @@ const AdminUserIndex = ({
                                 Role
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
+                                Institusi
+                            </TableHead>
+                            <TableHead className="bg-stone-200 font-semibold">
                                 Bergabung sejak
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
@@ -151,6 +154,9 @@ const AdminUserIndex = ({
                                 <TableCell>{user.name}</TableCell>
                                 <TableCell>
                                     {humanizeLevelAsRole(user.level.toString())}
+                                </TableCell>
+                                <TableCell>
+                                    {user.origin?.name ?? "-"}
                                 </TableCell>
                                 <TableCell>
                                     {ymdToIdDate(user.created_at)}
@@ -197,7 +203,7 @@ const AdminUserIndex = ({
                             </TableRow>
                         ))}
                         {users.data.length == 0 && (
-                            <EmptyTable colSpan={6} message="User tidak ada" />
+                            <EmptyTable colSpan={8} message="User tidak ada" />
                         )}
                     </TableBody>
                 </Table>

@@ -14,7 +14,7 @@ class UserController extends Controller
      public function index(Request $request)
     {
         $search = $request->query("search");
-        $users = User::when($search, function ($query, $search) {
+        $users = User::with("origin")->when($search, function ($query, $search) {
             return $query->where(function ($q) use ($search) {
                 $q->where("name", "like", "%" . $search . "%")->orWhere(
                     "username",
@@ -25,6 +25,9 @@ class UserController extends Controller
         })
             ->where("level", User::ROLE_COUNSELING_TEACHER)
             ->whereNot("id", Auth::user()->id)
+            ->whereHas("origin", function ($query) {
+                $query->where("mgbk_id", Auth::user()->id);
+            })
             ->orderBy("name", "asc")
             ->paginate(config("custom.default.pagination"));
         return Inertia::render("Mgbk/Teacher/Index", [
