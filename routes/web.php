@@ -18,6 +18,8 @@ use App\Http\Controllers\admin\ReportController as AdminReportController;
 use App\Http\Controllers\mgbk\UserController as MgbkUserController;
 use App\Http\Controllers\mgbk\OriginController as MgbkOriginController;
 use App\Http\Controllers\mgbk\ParticipantController as MgbkParticipantController;
+use App\Http\Controllers\mgbk\ResultController as MgbkResultController;
+use App\Http\Controllers\mgbk\ReportController as MgbkReportController;
 
 Route::get("/", [AuthController::class, "signedInStatus"])->name("login");
 Route::prefix("auth")->group(function () {
@@ -227,6 +229,43 @@ Route::prefix("mgbk")
                     MgbkParticipantController::class,
                     "destroy",
                 ])->name("destroy");
+            });
+
+                    // Results Routes
+        Route::prefix("results")
+            ->name("mgbk.results.")
+            ->group(function () {
+                Route::get("/", [MgbkResultController::class, "index"])->name(
+                    "index",
+                );
+                Route::get("/part-{participant_id}/quiz-{questionnaire_id}", [
+                    MgbkResultController::class,
+                    "showParticipantResults",
+                ])->name("show.participant");
+                Route::get("/part-{participant_id}/quiz-{questionnaire_id}/print", [
+                    MgbkResultController::class,
+                    "printParticipantResults",
+                ])->name("print.participant");
+                Route::get("/part-{participant_id}/res-{result_id}", [
+                    MgbkResultController::class,
+                    "showParticipantResultDetail",
+                ])->name("show.result");
+                Route::get("/part-{participant_id}/res-{result_id}/print", [
+                    MgbkResultController::class,
+                    "printParticipantResultDetail",
+                ])->name("print.result");
+            });
+
+                        // Report Routes
+        Route::prefix("reports")
+            ->name("mgbk.reports.")
+            ->group(function () {
+                Route::get("/", [MgbkReportController::class, "index"])->name(
+                    "index",
+                );
+                Route::get("/print", [MgbkReportController::class, "printPDF"])->name(
+                    "print",
+                );
             });
     });
 
