@@ -39,7 +39,7 @@ const adminNavs: NavItems = [
     },
     {
         type: "item",
-        title: "Data Asal",
+        title: "Data Asal Institusi",
         url: "/admin/origins",
         icon: Earth,
     },
@@ -88,14 +88,20 @@ const mgbkNavs: NavItems = [
     },
     {
         type: "item",
-        title: "Data Asal",
-        url: "/admin/origins",
+        title: "Data Guru",
+        url: "/mgbk/users",
+        icon: Users,
+    },
+    {
+        type: "item",
+        title: "Data Asal Institusi",
+        url: "/mgbk/origins",
         icon: Earth,
     },
     {
         type: "item",
         title: "Data Partisipan",
-        url: "/admin/participants",
+        url: "/mgbk/participants",
         icon: BookUser,
     },
     {
@@ -106,13 +112,13 @@ const mgbkNavs: NavItems = [
     {
         type: "item",
         title: "Hasil Kuisioner",
-        url: "/admin/results",
+        url: "/mgbk/results",
         icon: ClipboardCheck,
     },
     {
         type: "item",
         title: "Laporan",
-        url: "/admin/reports",
+        url: "/mgbk/reports",
         icon: FileText,
     },
 ];

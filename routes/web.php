@@ -2,12 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 // Global Controllers
-use App\Http\Controllers\global\AuthController;
-use App\Http\Controllers\global\ProfileController;
+use App\Http\Controllers\Global\AuthController;
+use App\Http\Controllers\Global\ProfileController;
 //Anwers Controllers
 use App\Http\Controllers\Answer\AnswerController as AnswerController;
 // Admin Controllers
-use App\Http\Controllers\global\DashboardController;
+use App\Http\Controllers\Global\DashboardController;
 use App\Http\Controllers\admin\QuestionnaireController as AdminQuestionnaireController;
 use App\Http\Controllers\admin\UserController as AdminUserController;
 use App\Http\Controllers\admin\OriginController as AdminOriginController;
@@ -15,6 +15,7 @@ use App\Http\Controllers\admin\ParticipantController as AdminParticipantControll
 use App\Http\Controllers\admin\ResultController as AdminResultController;
 use App\Http\Controllers\admin\ReportController as AdminReportController;
 
+use App\Http\Controllers\mgbk\UserController as MgbkUserController;
 Route::get("/", [AuthController::class, "signedInStatus"])->name("login");
 Route::prefix("auth")->group(function () {
     Route::get("/signin", [AuthController::class, "signInView"])
@@ -189,7 +190,20 @@ Route::prefix("mgbk")
             DashboardController::class,
             "mgbkIndex",
         ])->name("mgbk.dashboard.index");
+
+        // User Routes
+        Route::prefix("users")
+            ->name("mgbk.users.")
+            ->group(function () {
+                Route::get("/", [MgbkUserController::class, "index"])->name(
+                    "index",
+                );
+                Route::put("/{id}/active-status", [MgbkUserController::class, "activeStatusTeacher"])->name(
+                    "active-status",
+                );
+            }); 
     });
+
 
 
 
