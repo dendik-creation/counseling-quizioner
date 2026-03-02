@@ -9,6 +9,10 @@ export type User = {
     is_active: booelan;
     created_at?: string;
     updated_at?: string;
+    origin_id?: number;
+    origin?: Origin;
+    mgbk_id?: number;
+    mgbk?: User;
 };
 
 export type AdminUserIndexProps = PageTitleProps & {

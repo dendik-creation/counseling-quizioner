@@ -16,7 +16,7 @@ class UserController extends Controller
     {
         $search = $request->query("search");
         $level = $request->query("level");
-        $users = User::when($search, function ($query, $search) {
+        $users = User::with("origin", "mgbk")->when($search, function ($query, $search) {
             return $query->where(function ($q) use ($search) {
                 $q->where("name", "like", "%" . $search . "%")->orWhere(
                     "username",

@@ -26,4 +26,14 @@ class User extends Authenticatable
     const ROLE_ADMIN = 1;
     const ROLE_MGBK = 2;
     const ROLE_COUNSELING_TEACHER = 3;
+
+    public function origin()
+    {
+        return $this->belongsTo(Origin::class);
+    }
+
+    public function mgbk()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

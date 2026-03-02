@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\mgbk;
+namespace App\Http\Controllers\teacher;
 
 use App\Http\Controllers\Controller;
-use App\Models\Origin;
 use App\Models\Result;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,22 +12,18 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    /**
-     * Origin IDs milik MGBK yang sedang login.
-     */
-    private function myOriginIds(): array
+    /** Helper – origin_id tunggal guru */
+    private function myOriginId(): int
     {
-        return Origin::where('mgbk_id', Auth::id())->pluck('id')->toArray();
+        return (int) Auth::user()->origin_id;
     }
 
-    /**
-     * Build base query — sudah terscope ke origin MGBK + date range.
-     */
+    /** Base query sudah terscope ke 1 origin + date range */
     private function buildQuery(Request $request)
     {
-        $myOriginIds = $this->myOriginIds();
-        $dateRange   = $request->get('date_range');
-        $query       = Result::query()->whereIn('origin_id', $myOriginIds);
+        $originId  = $this->myOriginId();
+        $dateRange = $request->get('date_range');
+        $query     = Result::query()->where('origin_id', $originId);
 
         if ($dateRange && str_contains($dateRange, ' - ')) {
             [$from, $to] = explode(' - ', $dateRange);
@@ -49,14 +43,14 @@ class ReportController extends Controller
 
         $baseQ = $this->buildQuery($request);
 
-        /* ── Summary Cards ── */
+        /* ── Summary ── */
         $totalResults      = (clone $baseQ)->count();
         $totalParticipants = (clone $baseQ)->distinct('participant_id')->count('participant_id');
         $avgGus            = round((clone $baseQ)->avg('gus_point')  ?? 0, 1);
         $avgJi             = round((clone $baseQ)->avg('ji_point')   ?? 0, 1);
         $avgGang           = round((clone $baseQ)->avg('gang_point') ?? 0, 1);
 
-        /* ── Results per Day (line chart) ── */
+        /* ── Results per Day ── */
         $resultsPerDay = (clone $baseQ)
             ->select(DB::raw('date(completed_at) as date'), DB::raw('COUNT(*) as total'))
             ->groupBy(DB::raw('date(completed_at)'))
@@ -64,7 +58,7 @@ class ReportController extends Controller
             ->get()
             ->map(fn($r) => ['date' => $r->date, 'total' => $r->total]);
 
-        /* ── Score Distribution per Questionnaire (bar chart) ── */
+        /* ── Score per Questionnaire ── */
         $scoreByQuestionnaire = (clone $baseQ)
             ->join('questionnaires', 'results.questionnaire_id', '=', 'questionnaires.id')
             ->select(
@@ -78,7 +72,7 @@ class ReportController extends Controller
             ->orderByDesc('total_submissions')
             ->get();
 
-        /* ── Category Dominance (pie) ── */
+        /* ── Category Dominance ── */
         $totalGus  = (clone $baseQ)->sum('gus_point');
         $totalJi   = (clone $baseQ)->sum('ji_point');
         $totalGang = (clone $baseQ)->sum('gang_point');
@@ -89,16 +83,7 @@ class ReportController extends Controller
             ['label' => 'Gang', 'total' => $totalGang, 'percentage' => $grandSum > 0 ? round(($totalGang / $grandSum) * 100, 1) : 0],
         ];
 
-        /* ── Per-Institusi Breakdown (horizontal bar — MGBK specific) ── */
-        $perOrigin = (clone $baseQ)
-            ->join('origins', 'results.origin_id', '=', 'origins.id')
-            ->select('origins.id', 'origins.name', DB::raw('COUNT(*) as total'))
-            ->groupBy('origins.id', 'origins.name')
-            ->orderByDesc('total')
-            ->get()
-            ->map(fn($r) => ['name' => $r->name, 'total' => $r->total]);
-
-        /* ── Monthly Trend (area chart) ── */
+        /* ── Monthly Trend ── */
         $monthlyTrend = (clone $baseQ)
             ->select(
                 DB::raw("strftime('%Y-%m', completed_at) as month"),
@@ -110,30 +95,48 @@ class ReportController extends Controller
             ->get()
             ->map(fn($r) => ['month' => $r->month, 'total' => $r->total, 'avg_total_score' => $r->avg_total_score]);
 
-        /* ── Recent Results Table ── */
+        /* ── Score Range Distribution ── */
+        $scoreRanges = (clone $baseQ)
+            ->select(
+                DB::raw("
+                    CASE
+                        WHEN (gus_point + ji_point + gang_point) < 30  THEN 'Sangat Rendah (<30)'
+                        WHEN (gus_point + ji_point + gang_point) < 60  THEN 'Rendah (30–59)'
+                        WHEN (gus_point + ji_point + gang_point) < 90  THEN 'Sedang (60–89)'
+                        WHEN (gus_point + ji_point + gang_point) < 120 THEN 'Tinggi (90–119)'
+                        ELSE 'Sangat Tinggi (≥120)'
+                    END AS range_label
+                "),
+                DB::raw('COUNT(*) as total'),
+            )
+            ->groupBy('range_label')
+            ->orderBy(DB::raw('MIN(gus_point + ji_point + gang_point)'))
+            ->get();
+
+        /* ── Recent Results ── */
         $recentResults = (clone $baseQ)
             ->with(['participant', 'origin', 'questionnaire'])
             ->orderByDesc('completed_at')
             ->limit(20)
             ->get()
             ->map(fn($r) => [
-                'id'           => $r->id,
-                'participant'  => $r->participant?->name ?? '-',
-                'unique_code'  => $r->participant_unique_code,
-                'origin'       => $r->origin?->name ?? '-',
-                'questionnaire'=> $r->questionnaire?->title ?? '-',
-                'gus_point'    => $r->gus_point,
-                'ji_point'     => $r->ji_point,
-                'gang_point'   => $r->gang_point,
-                'total_point'  => $r->gus_point + $r->ji_point + $r->gang_point,
-                'completed_at' => $r->completed_at,
+                'id'            => $r->id,
+                'participant'   => $r->participant?->name ?? '-',
+                'unique_code'   => $r->participant_unique_code,
+                'origin'        => $r->origin?->name ?? '-',
+                'questionnaire' => $r->questionnaire?->title ?? '-',
+                'gus_point'     => $r->gus_point,
+                'ji_point'      => $r->ji_point,
+                'gang_point'    => $r->gang_point,
+                'total_point'   => $r->gus_point + $r->ji_point + $r->gang_point,
+                'completed_at'  => $r->completed_at,
             ]);
 
-        return Inertia::render('Mgbk/Report/Index', [
-            'title'               => 'Laporan Kuisioner',
-            'description'         => 'Visualisasi dan analisis data hasil kuisioner institusi Anda',
-            'filters'             => ['date_range' => $dateRange],
-            'summary'             => [
+        return Inertia::render('Teacher/Report/Index', [
+            'title'                 => 'Laporan Kuisioner',
+            'description'           => 'Visualisasi dan analisis data hasil kuisioner sekolah Anda',
+            'filters'               => ['date_range' => $dateRange],
+            'summary'               => [
                 'total_results'      => $totalResults,
                 'total_participants' => $totalParticipants,
                 'avg_gus'            => $avgGus,
@@ -143,7 +146,7 @@ class ReportController extends Controller
             'results_per_day'       => $resultsPerDay,
             'score_by_questionnaire'=> $scoreByQuestionnaire,
             'category_dominance'    => $categoryDominance,
-            'per_origin'            => $perOrigin,     // ← MGBK-specific
+            'score_ranges'          => $scoreRanges,
             'monthly_trend'         => $monthlyTrend,
             'recent_results'        => $recentResults,
         ]);
@@ -173,14 +176,6 @@ class ReportController extends Controller
             ->orderByDesc('total_submissions')
             ->get();
 
-        $perOrigin = (clone $baseQ)
-            ->join('origins', 'results.origin_id', '=', 'origins.id')
-            ->select('origins.id', 'origins.name', DB::raw('COUNT(*) as total'))
-            ->groupBy('origins.id', 'origins.name')
-            ->orderByDesc('total')
-            ->get()
-            ->map(fn($r) => ['name' => $r->name, 'total' => $r->total]);
-
         $totalGus  = (clone $baseQ)->sum('gus_point');
         $totalJi   = (clone $baseQ)->sum('ji_point');
         $totalGang = (clone $baseQ)->sum('gang_point');
@@ -196,23 +191,23 @@ class ReportController extends Controller
             ->orderByDesc('completed_at')
             ->get()
             ->map(fn($r) => [
-                'id'           => $r->id,
-                'participant'  => $r->participant?->name ?? '-',
-                'unique_code'  => $r->participant_unique_code,
-                'origin'       => $r->origin?->name ?? '-',
-                'questionnaire'=> $r->questionnaire?->title ?? '-',
-                'gus_point'    => $r->gus_point,
-                'ji_point'     => $r->ji_point,
-                'gang_point'   => $r->gang_point,
-                'total_point'  => $r->gus_point + $r->ji_point + $r->gang_point,
-                'completed_at' => $r->completed_at,
+                'id'            => $r->id,
+                'participant'   => $r->participant?->name ?? '-',
+                'unique_code'   => $r->participant_unique_code,
+                'origin'        => $r->origin?->name ?? '-',
+                'questionnaire' => $r->questionnaire?->title ?? '-',
+                'gus_point'     => $r->gus_point,
+                'ji_point'      => $r->ji_point,
+                'gang_point'    => $r->gang_point,
+                'total_point'   => $r->gus_point + $r->ji_point + $r->gang_point,
+                'completed_at'  => $r->completed_at,
             ]);
 
-        return Inertia::render('Mgbk/Report/Print', [
-            'title'               => 'Cetak Laporan Kuisioner',
-            'description'         => 'Laporan lengkap hasil kuisioner konseling institusi Anda',
-            'filters'             => ['date_range' => $dateRange],
-            'summary'             => [
+        return Inertia::render('Teacher/Report/Print', [
+            'title'                 => 'Cetak Laporan Kuisioner',
+            'description'           => 'Laporan lengkap hasil kuisioner sekolah Anda',
+            'filters'               => ['date_range' => $dateRange],
+            'summary'               => [
                 'total_results'      => $totalResults,
                 'total_participants' => $totalParticipants,
                 'avg_gus'            => $avgGus,
@@ -220,19 +215,8 @@ class ReportController extends Controller
                 'avg_gang'           => $avgGang,
             ],
             'score_by_questionnaire'=> $scoreByQuestionnaire,
-            'per_origin'            => $perOrigin,     // ← MGBK-specific
             'category_dominance'    => $categoryDominance,
             'all_results'           => $allResults,
         ]);
-    }
-
-    private function humanizeOriginType(string $type): string
-    {
-        return match ($type) {
-            'SCHOOL'    => 'Sekolah',
-            'COMMUNITY' => 'Komunitas',
-            'COMMON'    => 'Masyarakat Umum',
-            default     => 'Lainnya',
-        };
     }
 }

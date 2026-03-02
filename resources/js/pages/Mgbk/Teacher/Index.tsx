@@ -1,24 +1,16 @@
-import {
-    PaginatorBuilder,
-    SearchInput,
-    SelectSearchInput,
-} from "@/components/custom/FormElement";
+import { PaginatorBuilder, SearchInput } from "@/components/custom/FormElement";
 import {
     humanizeLevelAsRole,
     inputDebounce,
     ymdToIdDate,
 } from "@/components/helper/helper";
 import AppLayout from "@/partials/AppLayout";
-import { PageTitle } from "@/Partials/PageTitle";
-import { AdminUserIndexProps } from "@/types/user";
+import { PageTitle, PageTitleProps } from "@/Partials/PageTitle";
+import { User } from "@/types/user";
 import { router, useForm } from "@inertiajs/react";
 import { useEffect, useRef } from "react";
-import AdminUserCreate from "./ModalCreate";
 import AdminUserEdit from "./ModalEdit";
-import AdminUserModalResetPassword from "./ModalResetPassword";
-import ConfirmDialog from "@/components/custom/ConfirmDialog";
 import EmptyTable from "@/components/custom/EmptyTable";
-import { Button } from "@/components/ui/button";
 import {
     Table,
     TableBody,
@@ -27,20 +19,18 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { PaginationData } from "@/types/global";
 
-const AdminUserIndex = ({
-    title,
-    description,
-    users,
-    search,
-    level,
-}: AdminUserIndexProps) => {
+type PageProps = PageTitleProps & {
+    users: PaginationData<User>;
+    search: string;
+};
+
+const MgbkTeacherIndex = ({ title, description, users, search }: PageProps) => {
     const firstRender = useRef(true);
     const { data: filterData, setData: setFilterData } = useForm({
         search: search || "",
-        level: level || "",
     });
     const handleFilter = (key: keyof typeof filterData, value: string) => {
         setFilterData(key, value);
@@ -48,10 +38,9 @@ const AdminUserIndex = ({
 
     const debounceSearch = inputDebounce((data: typeof filterData) => {
         router.get(
-            "/admin/users",
+            "/mgbk/users",
             {
                 search: data.search,
-                level: data.level,
             },
             {
                 preserveState: true,
@@ -60,14 +49,6 @@ const AdminUserIndex = ({
             },
         );
     });
-
-    const handleDelete = (id: number) => {
-        router.delete(`/admin/users/${id}`, {
-            preserveScroll: true,
-            replace: true,
-            only: ["users"],
-        });
-    };
 
     useEffect(() => {
         if (firstRender.current) {
@@ -87,33 +68,7 @@ const AdminUserIndex = ({
                         onChange={(e) => handleFilter("search", e.target.value)}
                         value={filterData.search || ""}
                     />
-                    <div className="">
-                        <SelectSearchInput
-                            className="w-full"
-                            placeholder="Filter Role"
-                            value={filterData.level.toString() || ""}
-                            options={[
-                                {
-                                    label: "Admin",
-                                    value: "1",
-                                },
-                                {
-                                    label: "MGBK",
-                                    value: "2",
-                                },
-                                {
-                                    label: "Guru BK",
-                                    value: "3",
-                                },
-                            ]}
-                            onChange={(value) =>
-                                handleFilter("level", value.toString())
-                            }
-                            removeValue={() => handleFilter("level", "")}
-                        />
-                    </div>
                 </div>
-                <AdminUserCreate />
             </div>
 
             <div className="rounded-md border">
@@ -124,13 +79,10 @@ const AdminUserIndex = ({
                                 #
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Username
+                                Username (NIP)
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Nama
-                            </TableHead>
-                            <TableHead className="bg-stone-200 font-semibold">
-                                Role
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Institusi
@@ -153,9 +105,6 @@ const AdminUserIndex = ({
                                 <TableCell>{user.username}</TableCell>
                                 <TableCell>{user.name}</TableCell>
                                 <TableCell>
-                                    {humanizeLevelAsRole(user.level.toString())}
-                                </TableCell>
-                                <TableCell>
                                     {user.origin?.name ?? "-"}
                                 </TableCell>
                                 <TableCell>
@@ -177,33 +126,12 @@ const AdminUserIndex = ({
                                 <TableCell>
                                     <div className="flex items-center gap-2">
                                         <AdminUserEdit user={user} />
-                                        <AdminUserModalResetPassword
-                                            id={user.id}
-                                        />
-                                        <ConfirmDialog
-                                            triggerNode={
-                                                <span>
-                                                    <Button
-                                                        variant={"red"}
-                                                        size={"icon"}
-                                                    >
-                                                        <Trash2 />
-                                                    </Button>
-                                                </span>
-                                            }
-                                            title="Hapus User"
-                                            description="Menghapus user menyebabkan kehilangan akses terhadap sistem. Apakah anda yakin ?"
-                                            type="danger"
-                                            confirmAction={() =>
-                                                handleDelete(user.id as number)
-                                            }
-                                        />
                                     </div>
                                 </TableCell>
                             </TableRow>
                         ))}
                         {users.data.length == 0 && (
-                            <EmptyTable colSpan={8} message="User tidak ada" />
+                            <EmptyTable colSpan={7} message="Guru tidak ada" />
                         )}
                     </TableBody>
                 </Table>
@@ -222,4 +150,4 @@ const AdminUserIndex = ({
         </AppLayout>
     );
 };
-export default AdminUserIndex;
+export default MgbkTeacherIndex;

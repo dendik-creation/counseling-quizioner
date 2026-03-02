@@ -71,10 +71,12 @@ export const inputDebounce = (
     callback: (...args: any[]) => void,
     delay: number = 1000,
 ) => {
-    let timer: ReturnType<typeof setTimeout>;
+    let timer: ReturnType<typeof setTimeout> | null = null;
 
     return (...args: any[]) => {
-        clearTimeout(timer);
+        if (timer) {
+            clearTimeout(timer);
+        }
         timer = setTimeout(() => {
             callback(...args);
         }, delay);

@@ -22,7 +22,11 @@ class OriginController extends Controller
         });
         $origins = Origin::with("mgbk")->withCount([
             "participants as participant_count",
-        ])->paginate(config("custom.default.pagination"));
+        ])
+        ->when($search, function ($query) use ($search) {
+            $query->where("name", "like", "%" . $search . "%");
+        })
+        ->paginate(config("custom.default.pagination"));
         return Inertia::render("Admin/Origin/Index", [
             "title" => "Data Asal Partisipan",
             "description" =>

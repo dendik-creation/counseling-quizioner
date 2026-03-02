@@ -88,14 +88,20 @@ const mgbkNavs: NavItems = [
     },
     {
         type: "item",
+        title: "Data Guru",
+        url: "/mgbk/users",
+        icon: Users,
+    },
+    {
+        type: "item",
         title: "Data Asal",
-        url: "/admin/origins",
+        url: "/mgbk/origins",
         icon: Earth,
     },
     {
         type: "item",
         title: "Data Partisipan",
-        url: "/admin/participants",
+        url: "/mgbk/participants",
         icon: BookUser,
     },
     {
@@ -106,13 +112,13 @@ const mgbkNavs: NavItems = [
     {
         type: "item",
         title: "Hasil Kuisioner",
-        url: "/admin/results",
+        url: "/mgbk/results",
         icon: ClipboardCheck,
     },
     {
         type: "item",
         title: "Laporan",
-        url: "/admin/reports",
+        url: "/mgbk/reports",
         icon: FileText,
     },
 ];
@@ -123,6 +129,34 @@ const counselingTeacherNavs: NavItems = [
         title: "Dashboard",
         url: "/teacher/dashboard",
         icon: Grid2X2,
+    },
+    {
+        type: "splitter",
+        title: "Data Master",
+        url: "#",
+    },
+    {
+        type: "item",
+        title: "Data Partisipan",
+        url: "/teacher/participants",
+        icon: BookUser,
+    },
+    {
+        type: "splitter",
+        title: "Proses Kuisioner",
+        url: "#",
+    },
+    {
+        type: "item",
+        title: "Hasil Kuisioner",
+        url: "/teacher/results",
+        icon: ClipboardCheck,
+    },
+    {
+        type: "item",
+        title: "Laporan",
+        url: "/teacher/reports",
+        icon: FileText,
     },
 ];
 

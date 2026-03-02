@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware
                 "success" => fn() => $request->session()->get("success"),
                 "error" => fn() => $request->session()->get("error"),
                 "user" => fn() => Auth::user() ?: null,
+                "origin" => fn() => Auth::user()->origin['name'] ?? null,
             ],
         ]);
     }

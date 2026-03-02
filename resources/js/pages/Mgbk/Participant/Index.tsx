@@ -3,22 +3,12 @@ import {
     SearchInput,
     SelectSearchInput,
 } from "@/components/custom/FormElement";
-import {
-    humanizeLevelAsRole,
-    inputDebounce,
-    ymdToIdDate,
-} from "@/components/helper/helper";
+import { inputDebounce } from "@/components/helper/helper";
 import AppLayout from "@/partials/AppLayout";
-import { PageTitle } from "@/Partials/PageTitle";
-import { AdminUserIndexProps } from "@/types/user";
+import { PageTitle, PageTitleProps } from "@/Partials/PageTitle";
+import { Participant } from "@/types/participant";
 import { router, useForm } from "@inertiajs/react";
 import { useEffect, useRef } from "react";
-import AdminUserCreate from "./ModalCreate";
-import AdminUserEdit from "./ModalEdit";
-import AdminUserModalResetPassword from "./ModalResetPassword";
-import ConfirmDialog from "@/components/custom/ConfirmDialog";
-import EmptyTable from "@/components/custom/EmptyTable";
-import { Button } from "@/components/ui/button";
 import {
     Table,
     TableBody,
@@ -27,20 +17,32 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import ConfirmDialog from "@/components/custom/ConfirmDialog";
+import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import EmptyTable from "@/components/custom/EmptyTable";
+import AdminParticipantEdit from "./ModalEdit";
+import { PaginationData, SelectOption } from "@/types/global";
 
-const AdminUserIndex = ({
+type PageProps = PageTitleProps & {
+    participants: PaginationData<Participant>;
+    origins: SelectOption[];
+    origin: string;
+    search: string;
+};
+
+const MgbkParticipantIndex = ({
     title,
     description,
-    users,
+    participants,
+    origins,
+    origin,
     search,
-    level,
-}: AdminUserIndexProps) => {
+}: PageProps) => {
     const firstRender = useRef(true);
     const { data: filterData, setData: setFilterData } = useForm({
         search: search || "",
-        level: level || "",
+        origin: origin || "",
     });
     const handleFilter = (key: keyof typeof filterData, value: string) => {
         setFilterData(key, value);
@@ -48,24 +50,24 @@ const AdminUserIndex = ({
 
     const debounceSearch = inputDebounce((data: typeof filterData) => {
         router.get(
-            "/admin/users",
+            "/mgbk/participants",
             {
                 search: data.search,
-                level: data.level,
+                origin: data.origin,
             },
             {
                 preserveState: true,
                 replace: true,
-                only: ["users"],
+                only: ["participants"],
             },
         );
     });
 
     const handleDelete = (id: number) => {
-        router.delete(`/admin/users/${id}`, {
+        router.delete(`/mgbk/participants/${id}`, {
             preserveScroll: true,
             replace: true,
-            only: ["users"],
+            only: ["participants"],
         });
     };
 
@@ -82,38 +84,23 @@ const AdminUserIndex = ({
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2 w-full">
                     <SearchInput
-                        placeholder={`Cari berdasarkan nama`}
+                        placeholder={`Cari berdasarkan nama, kelas, pekerjaan`}
                         className="lg:max-w-sm w-full"
                         onChange={(e) => handleFilter("search", e.target.value)}
                         value={filterData.search || ""}
                     />
                     <div className="">
                         <SelectSearchInput
-                            className="w-full"
-                            placeholder="Filter Role"
-                            value={filterData.level.toString() || ""}
-                            options={[
-                                {
-                                    label: "Admin",
-                                    value: "1",
-                                },
-                                {
-                                    label: "MGBK",
-                                    value: "2",
-                                },
-                                {
-                                    label: "Guru BK",
-                                    value: "3",
-                                },
-                            ]}
+                            placeholder="Pilih Tipe Asal"
+                            options={origins}
+                            value={filterData.origin || ""}
                             onChange={(value) =>
-                                handleFilter("level", value.toString())
+                                handleFilter("origin", value.toString())
                             }
-                            removeValue={() => handleFilter("level", "")}
+                            removeValue={() => handleFilter("origin", "")}
                         />
                     </div>
                 </div>
-                <AdminUserCreate />
             </div>
 
             <div className="rounded-md border">
@@ -124,22 +111,19 @@ const AdminUserIndex = ({
                                 #
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Username
+                                ID Unik
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Nama
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Role
+                                Asal Partisipan
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Institusi
+                                Kelas
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
-                                Bergabung sejak
-                            </TableHead>
-                            <TableHead className="bg-stone-200 font-semibold">
-                                Status Aktif
+                                Pekerjaan
                             </TableHead>
                             <TableHead className="bg-stone-200 font-semibold">
                                 Aksi
@@ -147,38 +131,23 @@ const AdminUserIndex = ({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {users.data.map((user, index) => (
-                            <TableRow key={user.id}>
+                        {participants.data.map((participant, index) => (
+                            <TableRow key={participant.id}>
                                 <TableCell>{index + 1}</TableCell>
-                                <TableCell>{user.username}</TableCell>
-                                <TableCell>{user.name}</TableCell>
+                                <TableCell>{participant.unique_code}</TableCell>
+                                <TableCell>{participant.name}</TableCell>
+                                <TableCell>{participant.origin.name}</TableCell>
                                 <TableCell>
-                                    {humanizeLevelAsRole(user.level.toString())}
+                                    {participant?.class || "-"}
                                 </TableCell>
                                 <TableCell>
-                                    {user.origin?.name ?? "-"}
-                                </TableCell>
-                                <TableCell>
-                                    {ymdToIdDate(user.created_at)}
-                                </TableCell>
-                                <TableCell>
-                                    {user.is_active == null ? (
-                                        <Badge variant={"outline"}>
-                                            Butuh Persetujuan
-                                        </Badge>
-                                    ) : user.is_active ? (
-                                        <Badge variant={"green"}>Aktif</Badge>
-                                    ) : (
-                                        <Badge variant={"red"}>
-                                            Tidak Aktif
-                                        </Badge>
-                                    )}
+                                    {participant?.work || "-"}
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <AdminUserEdit user={user} />
-                                        <AdminUserModalResetPassword
-                                            id={user.id}
+                                        <AdminParticipantEdit
+                                            participant={participant}
+                                            origins={origins}
                                         />
                                         <ConfirmDialog
                                             triggerNode={
@@ -191,35 +160,43 @@ const AdminUserIndex = ({
                                                     </Button>
                                                 </span>
                                             }
-                                            title="Hapus User"
-                                            description="Menghapus user menyebabkan kehilangan akses terhadap sistem. Apakah anda yakin ?"
+                                            title="Hapus partisipan"
+                                            description="Menghapus partisipan menyebabkan hilangnya jejak kuisioner yang telah dikerjalan. Apakah anda yakin ?"
                                             type="danger"
                                             confirmAction={() =>
-                                                handleDelete(user.id as number)
+                                                handleDelete(
+                                                    participant.id as number,
+                                                )
                                             }
                                         />
                                     </div>
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {users.data.length == 0 && (
-                            <EmptyTable colSpan={8} message="User tidak ada" />
+                        {participants.data.length == 0 && (
+                            <EmptyTable
+                                colSpan={7}
+                                message="Partisipan tidak ada"
+                            />
                         )}
                     </TableBody>
                 </Table>
             </div>
             <div className="flex flex-col lg:flex-row justify-between items-center mt-3">
-                <p className="text-sm w-full">Total {users.total} Data</p>
-                {users.total > users.per_page && (
+                <p className="text-sm w-full">
+                    Total {participants.total} Data
+                </p>
+                {participants.total > participants.per_page && (
                     <PaginatorBuilder
-                        prevUrl={users.prev_page_url ?? "#"}
-                        nextUrl={users.next_page_url ?? "#"}
-                        currentPage={users.current_page}
-                        totalPage={users.last_page}
+                        prevUrl={participants.prev_page_url ?? "#"}
+                        nextUrl={participants.next_page_url ?? "#"}
+                        currentPage={participants.current_page}
+                        totalPage={participants.last_page}
                     />
                 )}
             </div>
         </AppLayout>
     );
 };
-export default AdminUserIndex;
+
+export default MgbkParticipantIndex;

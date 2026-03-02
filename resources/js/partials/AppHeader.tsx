@@ -18,9 +18,15 @@ interface AppHeaderProps {
     classNames?: string;
     name: string;
     level: string;
+    origin_name?: string;
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ classNames, name, level }) => {
+const AppHeader: React.FC<AppHeaderProps> = ({
+    classNames,
+    name,
+    level,
+    origin_name,
+}) => {
     return (
         <header
             className={cn(
@@ -37,7 +43,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ classNames, name, level }) => {
                         <div className="flex text-sm flex-col justify-center items-end">
                             <span className="">{name}</span>
                             <span className="text-xs font-semibold">
-                                {humanizeLevelAsRole(level.toString())}
+                                {humanizeLevelAsRole(level.toString())}{" "}
+                                {origin_name ?? ""}
                             </span>
                         </div>
                         <Avatar className="border-2 border-solid transition-all border-yellow-500">

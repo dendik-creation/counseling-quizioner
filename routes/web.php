@@ -2,28 +2,38 @@
 
 use Illuminate\Support\Facades\Route;
 // Global Controllers
-use App\Http\Controllers\global\AuthController;
-use App\Http\Controllers\global\ProfileController;
+use App\Http\Controllers\Global\AuthController;
+use App\Http\Controllers\Global\ProfileController;
 //Anwers Controllers
 use App\Http\Controllers\Answer\AnswerController as AnswerController;
 // Admin Controllers
-use App\Http\Controllers\global\DashboardController;
+use App\Http\Controllers\Global\DashboardController;
 use App\Http\Controllers\admin\QuestionnaireController as AdminQuestionnaireController;
 use App\Http\Controllers\admin\UserController as AdminUserController;
 use App\Http\Controllers\admin\OriginController as AdminOriginController;
 use App\Http\Controllers\admin\ParticipantController as AdminParticipantController;
 use App\Http\Controllers\admin\ResultController as AdminResultController;
 use App\Http\Controllers\admin\ReportController as AdminReportController;
+// MGBK Controllers
+use App\Http\Controllers\mgbk\UserController as MgbkUserController;
+use App\Http\Controllers\mgbk\OriginController as MgbkOriginController;
+use App\Http\Controllers\mgbk\ParticipantController as MgbkParticipantController;
+use App\Http\Controllers\mgbk\ResultController as MgbkResultController;
+use App\Http\Controllers\mgbk\ReportController as MgbkReportController;
+// Teacher Controllers
+use App\Http\Controllers\teacher\ParticipantController as TeacherParticipantController;
+use App\Http\Controllers\teacher\ResultController as TeacherResultController;
+use App\Http\Controllers\teacher\ReportController as TeacherReportController;
 
-Route::get("/", [AuthController::class, "signedInStatus"])->name("login");
-Route::prefix("auth")->group(function () {
-    Route::get("/signin", [AuthController::class, "signInView"])
-        ->name("auth.signin.index")
-        ->middleware("guest");
+Route::get('/', [AuthController::class, 'signedInStatus'])->name('login');
+Route::prefix('auth')->group(function () {
+    Route::get('/signin', [AuthController::class, 'signInView'])
+        ->name('auth.signin.index')
+        ->middleware('guest');
 
-    Route::post("/signin", [AuthController::class, "signIn"])
-        ->middleware("guest")
-        ->name("auth.signin.store");
+    Route::post('/signin', [AuthController::class, 'signIn'])
+        ->middleware('guest')
+        ->name('auth.signin.store');
 
     //Register
     Route::get("/register", [AuthController::class, "registerView"])
@@ -32,173 +42,83 @@ Route::prefix("auth")->group(function () {
     Route::post("/register", [AuthController::class, "registerStore"])
         ->name("auth.register.store")
         ->middleware("guest");
-
-    Route::prefix("questionnaire")->group(function () {
-        //Register Participant
-        Route::get("/check-token", [AuthController::class, "checkTokenView"])
-            ->name("auth.questionnaire.check-token.index")
-            ->middleware("guest");
-        Route::post("/check-token", [AuthController::class, "checkTokenStore"])
-            ->name("auth.questionnaire.check-token.store")
-            ->middleware("guest");
-
-        Route::get("/register", [AuthController::class, "registerQuestionnaireView"])
-            ->name("auth.questionnaire.register.index")
-            ->middleware("guest");
-        Route::post("/register", [AuthController::class, "registerQuestionnaireStore"])
-            ->name("auth.questionnaire.register.store")
-            ->middleware("guest");
-        Route::post('/unregister', [AuthController::class, 'unregisterQuestionnaireStore'])->middleware("guest");
-    });
+    Route::post("/unregister", [AuthController::class, "unregisterStore"])
+        ->name("auth.unregister.store")
+        ->middleware("guest");
 });
 
-Route::post("/auth/signout", [AuthController::class, "signOut"])
-    ->middleware("auth")
-    ->name("auth.signout.store");
+Route::post('/auth/signout', [AuthController::class, 'signOut'])
+    ->middleware('auth')
+    ->name('auth.signout.store');
 
 // Admin Routes
-Route::prefix("admin")
-    ->middleware("auth")
+Route::prefix('admin')
+    ->middleware('auth')
     ->group(function () {
-        Route::get("/dashboard", [
-            DashboardController::class,
-            "adminIndex",
-        ])->name("admin.dashboard.index");
+        Route::get('/dashboard', [DashboardController::class, 'adminIndex'])->name('admin.dashboard.index');
 
         // Master users
-        Route::prefix("users")
-            ->name("admin.users.")
+        Route::prefix('users')
+            ->name('admin.users.')
             ->group(function () {
-                Route::get("/", [AdminUserController::class, "index"])->name(
-                    "index",
-                );
-                Route::post("/", [AdminUserController::class, "store"])->name(
-                    "store",
-                );
-                Route::put("/{id}", [
-                    AdminUserController::class,
-                    "update",
-                ])->name("update");
-                Route::put("/{id}/reset-password", [
-                    AdminUserController::class,
-                    "resetPassword",
-                ])->name("admin.users.reset-password");
-                Route::delete("/{id}", [
-                    AdminUserController::class,
-                    "destroy",
-                ])->name("destroy");
+                Route::get('/', [AdminUserController::class, 'index'])->name('index');
+                Route::post('/', [AdminUserController::class, 'store'])->name('store');
+                Route::put('/{id}', [AdminUserController::class, 'update'])->name('update');
+                Route::put('/{id}/reset-password', [AdminUserController::class, 'resetPassword'])->name('admin.users.reset-password');
+                Route::delete('/{id}', [AdminUserController::class, 'destroy'])->name('destroy');
             });
         // Master participant origin
-        Route::prefix("origins")
-            ->name("admin.origins.")
+        Route::prefix('origins')
+            ->name('admin.origins.')
             ->group(function () {
-                Route::get("/", [AdminOriginController::class, "index"])->name(
-                    "index",
-                );
-                Route::post("/", [AdminOriginController::class, "store"])->name(
-                    "store",
-                );
-                Route::put("/{id}", [
-                    AdminOriginController::class,
-                    "update",
-                ])->name("update");
-                Route::delete("/{id}", [
-                    AdminOriginController::class,
-                    "destroy",
-                ])->name("destroy");
+                Route::get('/', [AdminOriginController::class, 'index'])->name('index');
+                Route::post('/', [AdminOriginController::class, 'store'])->name('store');
+                Route::put('/{id}', [AdminOriginController::class, 'update'])->name('update');
+                Route::delete('/{id}', [AdminOriginController::class, 'destroy'])->name('destroy');
             });
         // Master participant
-        Route::prefix("participants")
-            ->name("admin.participants.")
+        Route::prefix('participants')
+            ->name('admin.participants.')
             ->group(function () {
-                Route::get("/", [
-                    AdminParticipantController::class,
-                    "index",
-                ])->name("index");
-                Route::post("/", [
-                    AdminParticipantController::class,
-                    "store",
-                ])->name("store");
-                Route::put("/{id}", [
-                    AdminParticipantController::class,
-                    "update",
-                ])->name("update");
-                Route::delete("/{id}", [
-                    AdminParticipantController::class,
-                    "destroy",
-                ])->name("destroy");
+                Route::get('/', [AdminParticipantController::class, 'index'])->name('index');
+                Route::put('/{id}', [AdminParticipantController::class, 'update'])->name('update');
+                Route::delete('/{id}', [AdminParticipantController::class, 'destroy'])->name('destroy');
             });
         // Master questionnaires
-        Route::prefix("questionnaire")
-            ->name("admin.questionnaire.")
+        Route::prefix('questionnaire')
+            ->name('admin.questionnaire.')
             ->group(function () {
-                Route::get("/", [
-                    AdminQuestionnaireController::class,
-                    "index",
-                ])->name("index");
-                Route::get("/create", [
-                    AdminQuestionnaireController::class,
-                    "create",
-                ])->name("create");
-                Route::post("/", [
-                    AdminQuestionnaireController::class,
-                    "store",
-                ])->name("store");
-                Route::get("/{id}/edit", [
-                    AdminQuestionnaireController::class,
-                    "edit",
-                ])->name("edit");
-                Route::put("/{id}", [
-                    AdminQuestionnaireController::class,
-                    "update",
-                ])->name("update");
-                Route::delete("/{id}", [
-                    AdminQuestionnaireController::class,
-                    "destroy",
-                ])->name("destroy");
+                Route::get('/', [AdminQuestionnaireController::class, 'index'])->name('index');
+                Route::get('/create', [AdminQuestionnaireController::class, 'create'])->name('create');
+                Route::post('/', [AdminQuestionnaireController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [AdminQuestionnaireController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [AdminQuestionnaireController::class, 'update'])->name('update');
+                Route::delete('/{id}', [AdminQuestionnaireController::class, 'destroy'])->name('destroy');
             });
 
         // Results Routes
-        Route::prefix("results")
-            ->name("admin.results.")
+        Route::prefix('results')
+            ->name('admin.results.')
             ->group(function () {
-                Route::get("/", [AdminResultController::class, "index"])->name(
-                    "index",
-                );
-                Route::get("/part-{participant_id}/quiz-{questionnaire_id}", [
-                    AdminResultController::class,
-                    "showParticipantResults",
-                ])->name("show.participant");
-                Route::get("/part-{participant_id}/quiz-{questionnaire_id}/print", [
-                    AdminResultController::class,
-                    "printParticipantResults",
-                ])->name("print.participant");
-                Route::get("/part-{participant_id}/res-{result_id}", [
-                    AdminResultController::class,
-                    "showParticipantResultDetail",
-                ])->name("show.participant");
-                Route::get("/part-{participant_id}/res-{result_id}/print", [
-                    AdminResultController::class,
-                    "printParticipantResultDetail",
-                ])->name("print.participant");
+                Route::get('/', [AdminResultController::class, 'index'])->name('index');
+                Route::get('/part-{participant_id}/quiz-{questionnaire_id}', [AdminResultController::class, 'showParticipantResults'])->name('show.participant');
+                Route::get('/part-{participant_id}/quiz-{questionnaire_id}/print', [AdminResultController::class, 'printParticipantResults'])->name('print.participant');
+                Route::get('/part-{participant_id}/res-{result_id}', [AdminResultController::class, 'showParticipantResultDetail'])->name('show.participant');
+                Route::get('/part-{participant_id}/res-{result_id}/print', [AdminResultController::class, 'printParticipantResultDetail'])->name('print.participant');
             });
 
-        // Report Routes
+            // Report Routes
         Route::prefix("reports")
             ->name("admin.reports.")
             ->group(function () {
-                Route::get("/", [AdminReportController::class, "index"])->name(
-                    "index",
-                );
-                Route::get("/print", [AdminReportController::class, "printPDF"])->name(
-                    "print",
-                );
+                Route::get('/', [AdminReportController::class, 'index'])->name('index');
+                Route::get('/print', [AdminReportController::class, 'printPDF'])->name('print');
             });
     });
 
 // MGBK Routes
-Route::prefix("mgbk")
-    ->middleware("auth")
+Route::prefix('mgbk')
+    ->middleware('auth')
     ->group(function () {
         Route::get("/dashboard", [
             DashboardController::class,
@@ -207,16 +127,18 @@ Route::prefix("mgbk")
     });
 
 
+
+
 // Kuisonair Routes
-Route::prefix("questionnaire")->middleware(["participant", "answering"])->group(function () {
+Route::middleware(["participant", "answering"])->group(function () {
     Route::get("/guide", [AnswerController::class, "guide"])->name("guide");
 
     Route::middleware(["answering"])->group(function () {
-        Route::get("/in-progress", [
+        Route::get("/questionnaire/in-progress", [
             AnswerController::class,
             "answerIndex",
         ]);
-        Route::post("/in-progress", [
+        Route::post("/questionnaire/in-progress", [
             AnswerController::class,
             "answerStore",
         ]);
@@ -224,19 +146,10 @@ Route::prefix("questionnaire")->middleware(["participant", "answering"])->group(
 });
 
 // Global Routes
-Route::middleware("auth")->group(function () {
-    Route::put("/profile/update", [
-        ProfileController::class,
-        "profileUpdate",
-    ])->name("profile.update");
+Route::middleware('auth')->group(function () {
+    Route::put('/profile/update', [ProfileController::class, 'profileUpdate'])->name('profile.update');
 
     // Change Password
-    Route::post("/profile/check-password", [
-        ProfileController::class,
-        "checkPassword",
-    ])->name("profile.check-password");
-    Route::put("/profile/change-password", [
-        ProfileController::class,
-        "changePassword",
-    ])->name("profile.change-password");
+    Route::post('/profile/check-password', [ProfileController::class, 'checkPassword'])->name('profile.check-password');
+    Route::put('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
 });
