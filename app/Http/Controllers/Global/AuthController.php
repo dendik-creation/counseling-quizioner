@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Global;
 
 use App\Models\User;
 use Inertia\Inertia;
-use App\Models\Participant;
 use Illuminate\Http\Request;
-use App\Models\Questionnaire;
 use App\Models\Origin;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +18,7 @@ class AuthController extends Controller
         return match ($level) {
             User::ROLE_ADMIN => "/admin/dashboard",
             User::ROLE_MGBK => "/mgbk/dashboard",
-            User::ROLE_COUNSELING_TEACHER => "/counseling/dashboard",
+            User::ROLE_COUNSELING_TEACHER => "/teacher/dashboard",
             default => "/dashboard",
         };
     }

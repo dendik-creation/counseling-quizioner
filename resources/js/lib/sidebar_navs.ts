@@ -130,6 +130,34 @@ const counselingTeacherNavs: NavItems = [
         url: "/teacher/dashboard",
         icon: Grid2X2,
     },
+    {
+        type: "splitter",
+        title: "Data Master",
+        url: "#",
+    },
+    {
+        type: "item",
+        title: "Data Partisipan",
+        url: "/teacher/participants",
+        icon: BookUser,
+    },
+    {
+        type: "splitter",
+        title: "Proses Kuisioner",
+        url: "#",
+    },
+    {
+        type: "item",
+        title: "Hasil Kuisioner",
+        url: "/teacher/results",
+        icon: ClipboardCheck,
+    },
+    {
+        type: "item",
+        title: "Laporan",
+        url: "/teacher/reports",
+        icon: FileText,
+    },
 ];
 
 export const sidebarNavs = {

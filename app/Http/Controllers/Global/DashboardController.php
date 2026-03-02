@@ -282,6 +282,120 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function teacherIndex()
+    {
+        /** @var \App\Models\User $user */
+        $user     = Auth::user();
+        $originId = (int) $user->origin_id;
+
+        /* ── Base query — 1 sekolah saja ── */
+        $baseQ = Result::query()->where('origin_id', $originId);
+
+        /* ── Summary Cards ── */
+        $totalResults      = (clone $baseQ)->count();
+        $totalParticipants = (clone $baseQ)->distinct('participant_id')->count('participant_id');
+        $avgGus            = round((clone $baseQ)->avg('gus_point') ?? 0, 1);
+        $avgJi             = round((clone $baseQ)->avg('ji_point')  ?? 0, 1);
+        $avgGang           = round((clone $baseQ)->avg('gang_point') ?? 0, 1);
+
+        /* ── Bulan ini ── */
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth   = Carbon::now()->endOfMonth();
+        $monthQ = (clone $baseQ)->whereBetween('completed_at', [$startOfMonth, $endOfMonth]);
+        $thisMonthResults      = (clone $monthQ)->count();
+        $thisMonthParticipants = (clone $monthQ)->distinct('participant_id')->count('participant_id');
+
+        /* ── Results per Day (30 hari terakhir) ── */
+        $from30 = Carbon::now()->subDays(29)->startOfDay();
+        $resultsPerDay = (clone $baseQ)
+            ->where('completed_at', '>=', $from30)
+            ->select(DB::raw('date(completed_at) as date'), DB::raw('COUNT(*) as total'))
+            ->groupBy(DB::raw('date(completed_at)'))
+            ->orderBy('date')
+            ->get()
+            ->map(fn($r) => ['date' => $r->date, 'total' => $r->total]);
+
+        /* ── Score per Questionnaire ── */
+        $scoreByQuestionnaire = (clone $baseQ)
+            ->join('questionnaires', 'results.questionnaire_id', '=', 'questionnaires.id')
+            ->select(
+                'questionnaires.title',
+                DB::raw('ROUND(AVG(gus_point), 1) as avg_gus'),
+                DB::raw('ROUND(AVG(ji_point), 1) as avg_ji'),
+                DB::raw('ROUND(AVG(gang_point), 1) as avg_gang'),
+                DB::raw('COUNT(*) as total_submissions')
+            )
+            ->groupBy('questionnaires.id', 'questionnaires.title')
+            ->orderByDesc('total_submissions')
+            ->get();
+
+        /* ── Category Dominance ── */
+        $totalGus  = (clone $baseQ)->sum('gus_point');
+        $totalJi   = (clone $baseQ)->sum('ji_point');
+        $totalGang = (clone $baseQ)->sum('gang_point');
+        $grandSum  = $totalGus + $totalJi + $totalGang;
+        $categoryDominance = [
+            ['label' => 'Gus',  'total' => $totalGus,  'percentage' => $grandSum > 0 ? round(($totalGus  / $grandSum) * 100, 1) : 0],
+            ['label' => 'Ji',   'total' => $totalJi,   'percentage' => $grandSum > 0 ? round(($totalJi   / $grandSum) * 100, 1) : 0],
+            ['label' => 'Gang', 'total' => $totalGang, 'percentage' => $grandSum > 0 ? round(($totalGang / $grandSum) * 100, 1) : 0],
+        ];
+
+        /* ── Score Range Distribution ── */
+        $scoreRanges = (clone $baseQ)
+            ->select(
+                DB::raw("
+                    CASE
+                        WHEN (gus_point + ji_point + gang_point) < 30  THEN 'Sangat Rendah (<30)'
+                        WHEN (gus_point + ji_point + gang_point) < 60  THEN 'Rendah (30–59)'
+                        WHEN (gus_point + ji_point + gang_point) < 90  THEN 'Sedang (60–89)'
+                        WHEN (gus_point + ji_point + gang_point) < 120 THEN 'Tinggi (90–119)'
+                        ELSE 'Sangat Tinggi (≥120)'
+                    END AS range_label
+                "),
+                DB::raw('COUNT(*) as total'),
+            )
+            ->groupBy('range_label')
+            ->orderBy(DB::raw('MIN(gus_point + ji_point + gang_point)'))
+            ->get();
+
+        /* ── Recent Results (8 terbaru) ── */
+        $recentResults = (clone $baseQ)
+            ->with(['participant', 'questionnaire'])
+            ->orderByDesc('completed_at')
+            ->limit(8)
+            ->get()
+            ->map(fn($r) => [
+                'id'            => $r->id,
+                'participant'   => $r->participant?->name ?? '-',
+                'unique_code'   => $r->participant_unique_code,
+                'questionnaire' => $r->questionnaire?->title ?? '-',
+                'gus_point'     => $r->gus_point,
+                'ji_point'      => $r->ji_point,
+                'gang_point'    => $r->gang_point,
+                'total_point'   => $r->gus_point + $r->ji_point + $r->gang_point,
+                'completed_at'  => $r->completed_at,
+            ]);
+
+        return Inertia::render('Teacher/Dashboard', [
+            'title'                  => 'Dashboard',
+            'description'            => 'Ringkasan data kuisioner sekolah Anda',
+            'summary'                => [
+                'total_results'           => $totalResults,
+                'total_participants'      => $totalParticipants,
+                'avg_gus'                 => $avgGus,
+                'avg_ji'                  => $avgJi,
+                'avg_gang'                => $avgGang,
+                'this_month_results'      => $thisMonthResults,
+                'this_month_participants' => $thisMonthParticipants,
+            ],
+            'results_per_day'        => $resultsPerDay,
+            'score_by_questionnaire' => $scoreByQuestionnaire,
+            'category_dominance'     => $categoryDominance,
+            'score_ranges'           => $scoreRanges,
+            'recent_results'         => $recentResults,
+        ]);
+    }
+
     private function humanizeOriginType(string $type): string
     {
         return match ($type) {

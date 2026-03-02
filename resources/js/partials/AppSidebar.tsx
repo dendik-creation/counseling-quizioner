@@ -25,18 +25,26 @@ const matchRoleToNavs = (role: string) => {
     }
 };
 
+const bgColors: Record<string, string> = {
+    "1": "bg-slate-800",
+    "2": "bg-sky-900",
+    "3": "bg-zinc-800",
+};
+
 export default function AppSidebar({ role }: { role: string }) {
     const pathname = window.location.pathname;
     const items = matchRoleToNavs(role);
     return (
         <Sidebar>
-            <SidebarContent className="bg-stone-700 min-h-full relative h-full flex flex-col">
+            <SidebarContent
+                className={`${bgColors[role]} min-h-full relative h-full flex flex-col`}
+            >
                 <SidebarHeader className="mt-3 ms-3 gap-0">
                     <span className="text-white/80 font-bold">
                         My Konseling
                     </span>
                     <span className="text-white/60 text-sm font-normal">
-                        Sistem manajemen informasi kuisioner konseling
+                        Manajemen Kuisioner Konseling
                     </span>
                 </SidebarHeader>
                 <SidebarGroup>

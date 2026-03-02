@@ -35,6 +35,7 @@ export default function AppLayout({ children, className }: AppLayoutProps) {
                     <AppHeader
                         name={flash?.user?.name}
                         level={flash?.user?.level}
+                        origin_name={flash?.origin}
                     />
                     <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">
                         {children}
