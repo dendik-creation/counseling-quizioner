@@ -88,7 +88,6 @@ export function SearchInput({
         </div>
     );
 }
-
 export function SelectSearchInput({
     value,
     options,
@@ -97,6 +96,7 @@ export function SelectSearchInput({
     removeValue,
     className,
     tabIndex = 0,
+    disabled = false,
 }: {
     value: string;
     options: SelectOption[];
@@ -105,53 +105,77 @@ export function SelectSearchInput({
     removeValue?: () => void;
     className?: string;
     tabIndex?: number;
+    disabled?: boolean;
 }) {
     const [open, setOpen] = useState(false);
     const triggerRef = React.useRef<HTMLDivElement>(null);
+
     React.useEffect(() => {
         if (!open) return;
+
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Tab") {
                 setOpen(false);
             }
         };
+
         document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
+        return () =>
+            document.removeEventListener("keydown", handleKeyDown);
     }, [open]);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover
+            open={disabled ? false : open}
+            onOpenChange={(val) => {
+                if (!disabled) setOpen(val);
+            }}
+        >
             <PopoverTrigger asChild>
                 <div
                     ref={triggerRef}
                     role="combobox"
                     aria-expanded={open}
-                    tabIndex={tabIndex}
+                    tabIndex={disabled ? -1 : tabIndex}
                     className={cn(
-                        "min-w-full py-1.5 justify-between relative border border-input rounded-md px-4 flex items-center cursor-pointer outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                        className,
+                        "min-w-full py-1.5 justify-between relative border border-input rounded-md px-4 flex items-center outline-none transition-[color,box-shadow]",
+                        disabled
+                            ? "opacity-50 cursor-not-allowed bg-muted"
+                            : "cursor-pointer focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                        className
                     )}
                     onKeyDown={(e) => {
+                        if (disabled) return;
+
                         if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
                             setOpen(!open);
                         }
                     }}
-                    onClick={() => setOpen((prev) => !prev)}
+                    onClick={() => {
+                        if (!disabled) {
+                            setOpen((prev) => !prev);
+                        }
+                    }}
                 >
                     {value ? (
-                        <span className="font-normal">
+                        <span>
                             {
-                                options.find((option) => option.value == value)
-                                    ?.label
+                                options.find(
+                                    (option) => option.value == value
+                                )?.label
                             }
                         </span>
                     ) : (
-                        <span className="font-normal text-slate-500">
+                        <span className="text-slate-500">
                             {placeholder}
                         </span>
                     )}
-                    {value != "" && value != undefined && removeValue ? (
+
+                    {!disabled &&
+                    value !== "" &&
+                    value !== undefined &&
+                    removeValue ? (
                         <span
                             className="ml-2 h-4 w-4 shrink-0 opacity-50 cursor-pointer"
                             onClick={(e) => {
@@ -166,20 +190,29 @@ export function SelectSearchInput({
                     )}
                 </div>
             </PopoverTrigger>
-            <PopoverContent className="min-w-[400px] p-0" align="start">
-                <Command>
-                    <CommandInput placeholder="Cari pilihan..." />
-                    <CommandList>
-                        <CommandEmpty>Pilihan tidak ada</CommandEmpty>
-                        <CommandGroup>
-                            {options &&
-                                options.map((option) => (
+
+            {!disabled && (
+                <PopoverContent
+                    className="min-w-[400px] p-0"
+                    align="start"
+                >
+                    <Command>
+                        <CommandInput placeholder="Cari pilihan..." />
+
+                        <CommandList>
+                            <CommandEmpty>
+                                Pilihan tidak ada
+                            </CommandEmpty>
+
+                            <CommandGroup>
+                                {options?.map((option) => (
                                     <CommandItem
                                         key={option.value}
                                         value={option.value}
                                         onSelect={() => {
                                             onChange(option.value);
                                             setOpen(false);
+
                                             setTimeout(() => {
                                                 triggerRef.current?.focus();
                                             }, 0);
@@ -190,18 +223,20 @@ export function SelectSearchInput({
                                                 "mr-2 h-4 w-4",
                                                 value === option.value
                                                     ? "opacity-100"
-                                                    : "opacity-0",
+                                                    : "opacity-0"
                                             )}
                                         />
+
                                         <span className="w-full">
                                             {option.label}
                                         </span>
                                     </CommandItem>
                                 ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            )}
         </Popover>
     );
 }

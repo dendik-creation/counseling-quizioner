@@ -14,7 +14,7 @@ export function NumberGrid({
     onSelect,
 }: NumberGridProps) {
     return (
-        <div className="grid xl:grid-cols-4 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {Array.from({ length: total }, (_, idx) => {
                 const number = idx + 1;
                 const isActive = selected === number;
@@ -30,8 +30,8 @@ export function NumberGrid({
                             isActive
                                 ? "bg-blue-400 text-white border-blue-500"
                                 : isAnswered
-                                ? "bg-emerald-400 text-white border-emerald-500"
-                                : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                                  ? "bg-emerald-400 text-white border-emerald-500"
+                                  : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200",
                         )}
                     >
                         {number}

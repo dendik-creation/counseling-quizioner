@@ -113,10 +113,10 @@ export default function Registration({
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <div className="p-4 mb-5 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm flex gap-3">
+                        <div className="p-4 mb-5 rounded-md bg-stone-200 border border-stone-300 text-stone-700 text-sm flex gap-3">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="w-5 h-5 mt-0.5 text-yellow-600"
+                                className="w-5 h-5 mt-0.5 text-stone-600"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -340,7 +340,7 @@ export default function Registration({
                             </div>
                             <Button
                                 type="submit"
-                                variant={"yellow"}
+                                variant={"brown"}
                                 className="w-full p-6 MT-6"
                                 disabled={processing}
                             >

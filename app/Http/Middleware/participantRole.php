@@ -17,7 +17,7 @@ class participantRole
     {
         if (!session()->has("participant_id")) {
             return redirect()
-                ->route("auth.register.index")
+                ->route("auth.questionnaire.register.index")
                 ->with("error", "Silakan registrasi terlebih dahulu.");
         }
 

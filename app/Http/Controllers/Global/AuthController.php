@@ -91,10 +91,6 @@ class AuthController extends Controller
     }
     public function registerView()
     {
-        if (session("participant_id")) {
-            return redirect()->route("guide");
-        }
-
         $origins = Origin::where('type', 'SCHOOL')->get();
         $origins = $origins->map(function ($origin) {
             return [
@@ -148,9 +144,105 @@ class AuthController extends Controller
         return Inertia::location("/");
     }
 
-    public function unregisterStore()
+
+    public function checkTokenView()
     {
-        session()->forget(["answers", "participant_id"]);
-        return Inertia::location("/");
+        if (session("token")) return redirect()->route("auth.questionnaire.register.index");
+        if (session("participant_id")) {
+            return redirect()->route("auth.questionnaire.register.index");
+        }
+
+        return Inertia::render("Auth/CheckToken", [
+            "app_name" => "Check Token",
+        ]);
+    }
+
+    public function checkTokenStore(Request $request)
+    {
+        $request->validate(['token' => 'required']);
+
+        $questionnaires = Questionnaire::where("access_token", $request->token)
+            ->where("expires_at", ">=", now())
+            ->first();
+        if (!$questionnaires) {
+            return back()->withErrors([
+                "message" => "Token tidak ditemukan / expired",
+            ]);
+        }
+
+        session([
+            "token" => $request->token,
+        ]);
+
+        Session::flash("success", "Token teridentifikasi");
+        return Inertia::location("/auth/questionnaire/register");
+    }
+
+    public function registerQuestionnaireView()
+    {
+        if (!session("token")) return redirect()->route("auth.questionnaire.check-token.index");
+        if (session("participant_id"))
+            return redirect()->route("guide");
+
+        $origins = Origin::all();
+        $origins = $origins->map(function ($origin) {
+            return [
+                "value" => $origin->id,
+                "label" => $origin->name,
+            ];
+        });
+
+        $participants = Participant::with('origin:id,name')->get();
+        return Inertia::render("Auth/RegistrationQuestionnaire", [
+            "app_name" => "Register",
+            "origins" => $origins,
+            "participants" => $participants,
+        ]);
+    }
+
+    public function registerQuestionnaireStore(Request $request)
+    {
+        $data = $request->validate([
+            "name" => "required",
+            "unique_code" => "required",
+            "origin_id" => "required|exists:origins,id",
+            "status_regis" => "required",
+            "class" => "nullable",
+            "work" => "nullable",
+        ]);
+
+        if ($request->status_regis == 'existing') {
+            $request->validate([
+                "participant_id" => "required|exists:participants,id",
+            ]);
+        }
+
+        $questionnaires = Questionnaire::where("access_token", session("token"))
+            ->where("expires_at", ">=", now())
+            ->first();
+        if (!$questionnaires) {
+            return back()->withErrors([
+                "message" => "Token tidak ditemukan / expired",
+            ]);
+        }
+
+        if ($request->status_regis == 'existing') {
+            $participant = Participant::where('id', $request->participant_id)->first();
+        } else {
+            $participant = Participant::create($data);
+        }
+        session([
+            "participant_id" => $participant->id,
+            "questionnaires_id" => $questionnaires->id,
+        ]);
+
+        Session::flash("success", "Registrasi berhasil");
+        return Inertia::location("/questionnaire/guide");
+    }
+
+    public function unregisterQuestionnaireStore()
+    {
+        session()->forget(["answers", "participant_id", "token"]);
+        return Inertia::location("/auth/questionnaire/check-token");
     }
 }
