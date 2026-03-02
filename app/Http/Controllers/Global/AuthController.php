@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Global;
 
-use App\Models\User;
-use Inertia\Inertia;
-use Illuminate\Http\Request;
-use App\Models\Origin;
 use App\Http\Controllers\Controller;
+use App\Models\Origin;
+use App\Models\Participant;
+use App\Models\Questionnaire;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
 
 class AuthController extends Controller
 {
