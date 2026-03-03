@@ -4,10 +4,10 @@ use Illuminate\Support\Facades\Route;
 // Global Controllers
 use App\Http\Controllers\Global\AuthController;
 use App\Http\Controllers\Global\ProfileController;
+use App\Http\Controllers\Global\DashboardController;
 //Anwers Controllers
 use App\Http\Controllers\Answer\AnswerController as AnswerController;
 // Admin Controllers
-use App\Http\Controllers\Global\DashboardController;
 use App\Http\Controllers\admin\QuestionnaireController as AdminQuestionnaireController;
 use App\Http\Controllers\admin\UserController as AdminUserController;
 use App\Http\Controllers\admin\OriginController as AdminOriginController;
@@ -26,6 +26,9 @@ use App\Http\Controllers\teacher\ResultController as TeacherResultController;
 use App\Http\Controllers\teacher\ReportController as TeacherReportController;
 
 Route::get('/', [AuthController::class, 'signedInStatus'])->name('login');
+Route::get("/start-quiz", [AuthController::class, "startQuizView"])
+    ->name("auth.questionnaire.start-quiz.index")
+    ->middleware("guest");
 Route::prefix('auth')->group(function () {
     Route::get('/signin', [AuthController::class, 'signInView'])
         ->name('auth.signin.index')
@@ -138,10 +141,83 @@ Route::prefix('admin')
 Route::prefix('mgbk')
     ->middleware('auth')
     ->group(function () {
-        Route::get("/dashboard", [
-            DashboardController::class,
-            "mgbkIndex",
-        ])->name("mgbk.dashboard.index");
+        Route::get('/dashboard', [DashboardController::class, 'mgbkIndex'])->name('mgbk.dashboard.index');
+
+        // User Routes
+        Route::prefix('users')
+            ->name('mgbk.users.')
+            ->group(function () {
+                Route::get('/', [MgbkUserController::class, 'index'])->name('index');
+                Route::put('/{id}/active-status', [MgbkUserController::class, 'activeStatusTeacher'])->name('active-status');
+            });
+
+        // Origin Routes
+        Route::prefix('origins')
+            ->name('mgbk.origins.')
+            ->group(function () {
+                Route::get('/', [MgbkOriginController::class, 'index'])->name('index');
+            });
+
+        // Participant Routes
+        Route::prefix('participants')
+            ->name('mgbk.participants.')
+            ->group(function () {
+                Route::get('/', [MgbkParticipantController::class, 'index'])->name('index');
+                Route::put('/{id}', [MgbkParticipantController::class, 'update'])->name('update');
+                Route::delete('/{id}', [MgbkParticipantController::class, 'destroy'])->name('destroy');
+            });
+
+        // Results Routes
+        Route::prefix('results')
+            ->name('mgbk.results.')
+            ->group(function () {
+                Route::get('/', [MgbkResultController::class, 'index'])->name('index');
+                Route::get('/part-{participant_id}/quiz-{questionnaire_id}', [MgbkResultController::class, 'showParticipantResults'])->name('show.participant');
+                Route::get('/part-{participant_id}/quiz-{questionnaire_id}/print', [MgbkResultController::class, 'printParticipantResults'])->name('print.participant');
+                Route::get('/part-{participant_id}/res-{result_id}', [MgbkResultController::class, 'showParticipantResultDetail'])->name('show.result');
+                Route::get('/part-{participant_id}/res-{result_id}/print', [MgbkResultController::class, 'printParticipantResultDetail'])->name('print.result');
+            });
+
+        // Report Routes
+        Route::prefix('reports')
+            ->name('mgbk.reports.')
+            ->group(function () {
+                Route::get('/', [MgbkReportController::class, 'index'])->name('index');
+                Route::get('/print', [MgbkReportController::class, 'printPDF'])->name('print');
+            });
+    });
+
+// Teacher Routes
+Route::prefix('teacher')
+    ->middleware('auth')
+    ->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'teacherIndex'])->name('teacher.dashboard.index');
+        // Participant Routes
+        Route::prefix('participants')
+            ->name('teacher.participants.')
+            ->group(function () {
+                Route::get('/', [TeacherParticipantController::class, 'index'])->name('index');
+                Route::put('/{id}', [TeacherParticipantController::class, 'update'])->name('update');
+                Route::delete('/{id}', [TeacherParticipantController::class, 'destroy'])->name('destroy');
+            });
+        // Results Routes
+        Route::prefix('results')
+            ->name('teacher.results.')
+            ->group(function () {
+                Route::get('/', [TeacherResultController::class, 'index'])->name('index');
+                Route::get('/part-{participant_id}/quiz-{questionnaire_id}', [TeacherResultController::class, 'showParticipantResults'])->name('show.participant');
+                Route::get('/part-{participant_id}/quiz-{questionnaire_id}/print', [TeacherResultController::class, 'printParticipantResults'])->name('print.participant');
+                Route::get('/part-{participant_id}/res-{result_id}', [TeacherResultController::class, 'showParticipantResultDetail'])->name('show.result');
+                Route::get('/part-{participant_id}/res-{result_id}/print', [TeacherResultController::class, 'printParticipantResultDetail'])->name('print.result');
+            });
+
+        // Report Routes
+        Route::prefix('reports')
+            ->name('teacher.reports.')
+            ->group(function () {
+                Route::get('/', [TeacherReportController::class, 'index'])->name('index');
+                Route::get('/print', [TeacherReportController::class, 'printPDF'])->name('print');
+            });
     });
 
 

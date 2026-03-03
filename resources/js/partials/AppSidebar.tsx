@@ -41,10 +41,10 @@ export default function AppSidebar({ role }: { role: string }) {
             >
                 <SidebarHeader className="mt-3 ms-3 gap-0">
                     <span className="text-white/80 font-bold">
-                        My Konseling
+                        E-Counseling GusJiGang
                     </span>
                     <span className="text-white/60 text-sm font-normal">
-                        Manajemen Kuisioner Konseling
+                        Kuisioner Konseling Online
                     </span>
                 </SidebarHeader>
                 <SidebarGroup>

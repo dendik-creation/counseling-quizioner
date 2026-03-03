@@ -144,6 +144,12 @@ class AuthController extends Controller
         return Inertia::location("/");
     }
 
+    public function startQuizView(Request $request)
+    {
+        $token = $request->query("q");
+        return redirect()->route("auth.questionnaire.check-token.index", ["q" => $token]);
+    }
+
 
     public function checkTokenView()
     {
@@ -162,11 +168,16 @@ class AuthController extends Controller
         $request->validate(['token' => 'required']);
 
         $questionnaires = Questionnaire::where("access_token", $request->token)
-            ->where("expires_at", ">=", now())
             ->first();
         if (!$questionnaires) {
             return back()->withErrors([
-                "message" => "Token tidak ditemukan / expired",
+                "message" => "Token tidak ditemukan",
+            ]);
+        }
+
+        if ($questionnaires->expires_at < now()) {
+            return back()->withErrors([
+                "message" => "Token kadaluarsa",
             ]);
         }
 

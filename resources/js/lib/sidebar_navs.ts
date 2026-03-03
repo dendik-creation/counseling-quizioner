@@ -51,7 +51,7 @@ const adminNavs: NavItems = [
     },
     {
         type: "item",
-        title: "Kuis & Pertanyaan",
+        title: "Data Kuisioner",
         url: "/admin/questionnaire",
         icon: ListTodo,
     },

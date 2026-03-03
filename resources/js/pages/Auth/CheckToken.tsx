@@ -10,8 +10,9 @@ import { Toaster } from "react-hot-toast";
 export default function CheckToken({ app_name }: { app_name: string }) {
     const { flash } = usePage().props as any;
     const [loading, setLoading] = useState(false);
+
     const { data, setData, post, errors, setError } = useForm({
-        token: "",
+        token: new URLSearchParams(window.location.search).get("q") || "",
     });
 
     useEffect(() => {
@@ -42,7 +43,7 @@ export default function CheckToken({ app_name }: { app_name: string }) {
             preserveScroll: true,
             replace: true,
             onError: (errors) => {
-                 setLoading(false);
+                setLoading(false);
                 return BlastToaster("error", errors.message);
             },
         });

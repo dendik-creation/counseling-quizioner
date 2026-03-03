@@ -12,10 +12,11 @@ import {
 import { Link, router } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import ConfirmDialog from "@/components/custom/ConfirmDialog";
-import { CircleCheck, CircleX, Pencil, Plus, Trash2 } from "lucide-react";
+import { ExternalLink, Pencil, Trash2 } from "lucide-react";
 import EmptyTable from "@/components/custom/EmptyTable";
 import { ymdToIdDate } from "@/components/helper/helper";
 import { PaginatorBuilder } from "@/components/custom/FormElement";
+import QuestionnaireModalShare from "./ModalShare";
 
 const QuestionnaireIndex = ({
     title,
@@ -93,6 +94,11 @@ const QuestionnaireIndex = ({
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
+                                                <QuestionnaireModalShare
+                                                    questionnaire={
+                                                        questionnaire
+                                                    }
+                                                />
                                                 <Link
                                                     href={`/admin/questionnaire/${questionnaire.id}/edit`}
                                                 >
