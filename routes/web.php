@@ -45,6 +45,24 @@ Route::prefix('auth')->group(function () {
     Route::post("/unregister", [AuthController::class, "unregisterStore"])
         ->name("auth.unregister.store")
         ->middleware("guest");
+
+    Route::prefix("questionnaire")->group(function () {
+        //Register Participant
+        Route::get("/check-token", [AuthController::class, "checkTokenView"])
+            ->name("auth.questionnaire.check-token.index")
+            ->middleware("guest");
+        Route::post("/check-token", [AuthController::class, "checkTokenStore"])
+            ->name("auth.questionnaire.check-token.store")
+            ->middleware("guest");
+
+        Route::get("/register", [AuthController::class, "registerQuestionnaireView"])
+            ->name("auth.questionnaire.register.index")
+            ->middleware("guest");
+        Route::post("/register", [AuthController::class, "registerQuestionnaireStore"])
+            ->name("auth.questionnaire.register.store")
+            ->middleware("guest");
+        Route::post('/unregister', [AuthController::class, 'unregisterQuestionnaireStore'])->middleware("guest");
+    });
 });
 
 Route::post('/auth/signout', [AuthController::class, 'signOut'])
@@ -107,7 +125,7 @@ Route::prefix('admin')
                 Route::get('/part-{participant_id}/res-{result_id}/print', [AdminResultController::class, 'printParticipantResultDetail'])->name('print.participant');
             });
 
-            // Report Routes
+        // Report Routes
         Route::prefix("reports")
             ->name("admin.reports.")
             ->group(function () {
@@ -125,8 +143,6 @@ Route::prefix('mgbk')
             "mgbkIndex",
         ])->name("mgbk.dashboard.index");
     });
-
-
 
 
 // Kuisonair Routes

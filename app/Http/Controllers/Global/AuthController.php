@@ -185,13 +185,6 @@ class AuthController extends Controller
             return redirect()->route("guide");
 
         $origins = Origin::all();
-        $origins = $origins->map(function ($origin) {
-            return [
-                "value" => $origin->id,
-                "label" => $origin->name,
-            ];
-        });
-
         $participants = Participant::with('origin:id,name')->get();
         return Inertia::render("Auth/RegistrationQuestionnaire", [
             "app_name" => "Register",
@@ -221,23 +214,20 @@ class AuthController extends Controller
             ->where("expires_at", ">=", now())
             ->first();
         if (!$questionnaires) {
+            session()->forget(["answers", "participant_id", "token"]);
             return back()->withErrors([
                 "message" => "Token tidak ditemukan / expired",
             ]);
         }
 
-        if ($request->status_regis == 'existing') {
-            $participant = Participant::where('id', $request->participant_id)->first();
-        } else {
-            $participant = Participant::create($data);
-        }
+        $participant = Participant::create($data);
         session([
             "participant_id" => $participant->id,
             "questionnaires_id" => $questionnaires->id,
         ]);
 
         Session::flash("success", "Registrasi berhasil");
-        return Inertia::location("/questionnaire/guide");
+        return Inertia::location("/guide");
     }
 
     public function unregisterQuestionnaireStore()

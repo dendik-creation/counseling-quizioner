@@ -45,6 +45,7 @@ export default function RegistrationQuestionnaire({
 
     const [mode, setMode] = useState<"new" | "existing">("new");
     const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
+    const [selectedOrigin, setSelectedOrigin] = useState<any>(null);
 
     const changeMode = (newMode: "new" | "existing") => {
         setMode(newMode);
@@ -59,6 +60,7 @@ export default function RegistrationQuestionnaire({
         });
 
         setSelectedParticipant(null);
+        setSelectedOrigin(null);
     };
 
     useEffect(() => {
@@ -198,7 +200,13 @@ export default function RegistrationQuestionnaire({
                                                     (p) => p.id == val,
                                                 );
 
+                                                const findOrigin = origins.find(
+                                                    (p) =>
+                                                        p.id == find?.origin_id,
+                                                );
+
                                                 setSelectedParticipant(find);
+                                                setSelectedOrigin(findOrigin);
 
                                                 setData(
                                                     "participant_id",
@@ -239,7 +247,7 @@ export default function RegistrationQuestionnaire({
                                     <Input
                                         type="text"
                                         placeholder="Kode Unik"
-                                        readOnly={mode === "existing"}
+                                        // readOnly={mode === "existing"}
                                         autoFocus={true}
                                         value={data.unique_code}
                                         onChange={(e) =>
@@ -266,15 +274,27 @@ export default function RegistrationQuestionnaire({
                                     </span>
                                     <SelectSearchInput
                                         placeholder="Pilih Asal Peserta"
-                                        options={origins}
-                                        disabled={mode === "existing"}
-                                        value={data.origin_id}
+                                        options={origins.map((p) => ({
+                                            value: p.id,
+                                            label: p.name,
+                                        }))}
+                                        disabled={
+                                            mode === "existing" &&
+                                            selectedOrigin?.type === "COMMON"
+                                        }
+                                        // value={data.origin_id}
+                                        value={selectedOrigin?.id}
                                         removeValue={() =>
                                             setData("origin_id", "")
                                         }
-                                        onChange={(value) =>
-                                            setData("origin_id", String(value))
-                                        }
+                                        onChange={(val) => {
+                                            const find = origins.find(
+                                                (p) => p.id == val,
+                                            );
+
+                                            setSelectedOrigin(find);
+                                            setData("origin_id", String(val));
+                                        }}
                                         className={`pl-10 py-3 ${
                                             errors.origin_id
                                                 ? "border-red-500"
@@ -294,7 +314,7 @@ export default function RegistrationQuestionnaire({
                                     <Input
                                         type="text"
                                         placeholder="Kelas"
-                                        readOnly={mode === "existing"}
+                                        // readOnly={mode === "existing"}
                                         value={data.class}
                                         onChange={(e) =>
                                             setData("class", e.target.value)
@@ -317,7 +337,7 @@ export default function RegistrationQuestionnaire({
                                         type="text"
                                         placeholder="Pekerjaan"
                                         value={data.work}
-                                        readOnly={mode === "existing"}
+                                        // readOnly={mode === "existing"}
                                         onChange={(e) =>
                                             setData("work", e.target.value)
                                         }
