@@ -81,7 +81,8 @@ export default function Registration({
             setError("origin_id", "Pilih instansi");
         if (isManualOrigin && !data.origin_name)
             setError("origin_name", "Isi nama instansi");
-        if (!data.city_name) setError("city_name", "Pilih kota");
+        if (isManualOrigin && !data.city_name)
+            setError("city_name", "Pilih kota");
         if (
             !data.name ||
             !data.username ||
