@@ -18,13 +18,7 @@ import axios from "axios";
 import { CircleX, Loader, Pencil, Save } from "lucide-react";
 import React, { useEffect } from "react";
 
-const AdminUserEdit = ({
-    user,
-    active_origin,
-}: {
-    user: User;
-    active_origin?: string;
-}) => {
+const AdminUserEdit = ({ user }: { user: User }) => {
     const {
         data,
         setData,
@@ -41,7 +35,7 @@ const AdminUserEdit = ({
         level: user.level || "",
         is_active:
             user.is_active == null ? "" : user.is_active ? "true" : "false",
-        mgbk_city: active_origin || "",
+        mgbk_city: user?.mgbk_city || "",
     });
 
     const {

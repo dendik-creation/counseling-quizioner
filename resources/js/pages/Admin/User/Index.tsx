@@ -69,15 +69,6 @@ const AdminUserIndex = ({
         });
     };
 
-    const getActiveMgbkOriginForEdit = (user: User) => {
-        if (Number(user.level) == 2 && user.mgbk_origins) {
-            return user.mgbk_origins.length > 0
-                ? user.mgbk_origins[0].city
-                : "";
-        }
-        return "";
-    };
-
     useEffect(() => {
         if (firstRender.current) {
             firstRender.current = false;
@@ -185,12 +176,7 @@ const AdminUserIndex = ({
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <AdminUserEdit
-                                            user={user}
-                                            active_origin={getActiveMgbkOriginForEdit(
-                                                user,
-                                            )}
-                                        />
+                                        <AdminUserEdit user={user} />
                                         <AdminUserModalResetPassword
                                             id={user.id}
                                         />

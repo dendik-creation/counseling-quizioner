@@ -24,6 +24,7 @@ return new class extends Migration
                 ->references("id")
                 ->on("users")
                 ->nullOnDelete();
+            $table->string("mgbk_city")->nullable(); // for mgbk user
         });
 
         Schema::table('origins', function (Blueprint $table) {
@@ -43,7 +44,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['origin_id']);
             $table->dropForeign(['mgbk_id']);
-            $table->dropColumn(['origin_id', 'mgbk_id']);
+            $table->dropColumn(['origin_id', 'mgbk_id', 'mgbk_city']);
         });
 
         Schema::table('origins', function (Blueprint $table) {

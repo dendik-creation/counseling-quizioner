@@ -126,7 +126,14 @@ class AuthController extends Controller
                 "city_name" => "required",
             ]);
 
-            $origin = Origin::create(['name' => $request->origin_name, 'type' => 'SCHOOL', 'city' => $request->city_name]);
+            $expected_mgbk = User::where("level", User::ROLE_MGBK)->where("is_active", 1)->where("mgbk_city", $request->city_name)->first();
+            if (!$expected_mgbk) {
+                return back()->withErrors([
+                    "message" => "Area " . $request->city_name . " belum memiliki MGBK. Registrasi dibatalkan",
+                ]);
+            }
+
+            $origin = Origin::create(['name' => $request->origin_name, 'type' => 'SCHOOL', 'city' => $request->city_name, 'mgbk_id' => $expected_mgbk->id]);
             $origin_id = $origin->id;
         }
 

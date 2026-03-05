@@ -17,7 +17,7 @@ class UserController extends Controller
     {
         $search = $request->query("search");
         $level = $request->query("level");
-        $users = User::with("origin", "mgbk", "mgbk_origins")->when($search, function ($query, $search) {
+        $users = User::with("origin", "mgbk")->when($search, function ($query, $search) {
             return $query->where(function ($q) use ($search) {
                 $q->where("name", "like", "%" . $search . "%")->orWhere(
                     "username",
@@ -57,7 +57,12 @@ class UserController extends Controller
             "username" => "required|max:255|unique:users,username",
             "password" => "required",
             "level" => "required",
+            "mgbk_city" => "required_if:level," . User::ROLE_MGBK,
         ]);
+
+        if ($validated["level"] == User::ROLE_MGBK) {
+            $validated["mgbk_city"] = $validated["mgbk_city"];
+        }
 
         $validated["password"] = Hash::make($validated["password"]);
         User::create($validated);
@@ -78,7 +83,12 @@ class UserController extends Controller
             "username" => "required|max:255|unique:users,username," . $user->id,
             "level" => "required",
             "is_active" => "nullable|string|in:true,false",
+            "mgbk_city" => "required_if:level," . User::ROLE_MGBK,
         ]);
+
+        if ($validated["level"] == User::ROLE_MGBK) {
+            $validated["mgbk_city"] = $validated["mgbk_city"];
+        }
 
         $validated["is_active"] = ($validated["is_active"] == null
                 ? null

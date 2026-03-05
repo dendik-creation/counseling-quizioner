@@ -26,6 +26,7 @@ class UserSeed extends Seeder
             "name" => "MGBK Kudus",
             "level" => 2,
             "password" => Hash::make(config("custom.default.user_password")),
+            "mgbk_city" => "KUDUS",
         ]);
 
         User::create([
@@ -33,6 +34,7 @@ class UserSeed extends Seeder
             "name" => "MGBK Pati",
             "level" => 2,
             "password" => Hash::make(config("custom.default.user_password")),
+            "mgbk_city" => "PATI",
         ]);
     }
 }

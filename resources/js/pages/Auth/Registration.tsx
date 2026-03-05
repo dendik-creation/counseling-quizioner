@@ -97,6 +97,9 @@ export default function Registration({
         post("/auth/register", {
             preserveScroll: true,
             replace: true,
+            onError: (error) => {
+                return BlastToaster("error", error.message);
+            },
         });
     };
 
@@ -107,10 +110,10 @@ export default function Registration({
                 <div className="w-full flex flex-col justify-center p-6">
                     <CardHeader className="p-0 mb-4">
                         <CardTitle className="text-center font-bold text-2xl">
-                            Registrasi
+                            Registrasi Guru
                         </CardTitle>
                         <CardDescription className="text-center">
-                            Masukkan data diri Anda untuk akses Guru
+                            Masukkan data diri Anda untuk akses sebagai Guru BK
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -180,8 +183,8 @@ export default function Registration({
                                                 setData("origin_name", "");
                                             }}
                                         />
-                                        <label className="text-base">
-                                            Instansi tidak terdaftar
+                                        <label className="text-sm">
+                                            Daftarkan instansi jika tidak ada
                                         </label>
                                     </div>
                                 </div>
