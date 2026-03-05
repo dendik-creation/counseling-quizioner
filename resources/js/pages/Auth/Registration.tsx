@@ -19,9 +19,11 @@ import {
     UserCog,
     ShieldCheck,
     Building2,
+    Map,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
+import AVAILABLE_CITIES from "@/lib/available_cities";
 
 export default function Registration({
     app_name,
@@ -32,15 +34,17 @@ export default function Registration({
 }) {
     const { flash } = usePage().props as any;
     const [isManualOrigin, setIsManualOrigin] = useState(false);
-    const { data, setData, post, processing, errors, setError } = useForm({
-        name: "",
-        username: "",
-        password: "",
-        confirm_password: "",
-        origin_status: false,
-        origin_id: "",
-        origin_name: "",
-    });
+    const { data, setData, post, processing, errors, setError, clearErrors } =
+        useForm({
+            name: "",
+            username: "",
+            password: "",
+            confirm_password: "",
+            origin_status: false,
+            origin_id: "",
+            origin_name: "",
+            city_name: "",
+        });
 
     useEffect(() => {
         if (flash?.success) {
@@ -58,7 +62,7 @@ export default function Registration({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        clearErrors();
         if (!data.name) setError("name", "Masukkan nama");
         if (!data.username) setError("username", "Masukkan username");
         if (!data.password) setError("password", "Masukkan password");
@@ -77,6 +81,7 @@ export default function Registration({
             setError("origin_id", "Pilih instansi");
         if (isManualOrigin && !data.origin_name)
             setError("origin_name", "Isi nama instansi");
+        if (!data.city_name) setError("city_name", "Pilih kota");
         if (
             !data.name ||
             !data.username ||
@@ -84,17 +89,13 @@ export default function Registration({
             !data.confirm_password ||
             data.password !== data.confirm_password ||
             (!isManualOrigin && !data.origin_id) ||
-            (isManualOrigin && !data.origin_name)
+            (isManualOrigin && !data.origin_name) ||
+            !data.city_name
         )
             return;
 
         post("/auth/register", {
-            // data: {
-            //     ...data,
-            //     confirm_password: undefined,
-            //     origin_id: isManualOrigin ? null : data.origin_id,
-            // },
-            // preserveScroll: true,
+            preserveScroll: true,
             replace: true,
         });
     };
@@ -130,9 +131,10 @@ export default function Registration({
                             </svg>
 
                             <div>
-                                <span className="font-semibold">Catatan: </span>
-                                Jika Instansi tidak ditemukan, anda dapat
-                                memasukkan secara manual.
+                                <span className="mt-2">
+                                    Masukkan Instansi manual jika tidak
+                                    ditemukan di pencarian
+                                </span>
                             </div>
                         </div>
 
@@ -252,6 +254,43 @@ export default function Registration({
                                     </>
                                 )}
                             </div>
+                            {isManualOrigin && (
+                                <div className="relative">
+                                    <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                        Kota
+                                    </label>
+                                    <div className="flex items-center">
+                                        <span className="absolute left-3 text-gray-500">
+                                            <Map />
+                                        </span>
+
+                                        <>
+                                            <SelectSearchInput
+                                                placeholder="Pilih Kota"
+                                                options={AVAILABLE_CITIES}
+                                                value={data.city_name}
+                                                removeValue={() =>
+                                                    setData("city_name", "")
+                                                }
+                                                onChange={(value) =>
+                                                    setData(
+                                                        "city_name",
+                                                        String(value),
+                                                    )
+                                                }
+                                                className={`pl-10 py-3 ${
+                                                    errors.city_name
+                                                        ? "border-red-500"
+                                                        : ""
+                                                }`}
+                                            />{" "}
+                                        </>
+                                    </div>
+                                    {errors.city_name && (
+                                        <ErrorInput error={errors.city_name} />
+                                    )}
+                                </div>
+                            )}
                             <div className="relative">
                                 <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
                                     Username

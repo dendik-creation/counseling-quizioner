@@ -123,9 +123,10 @@ class AuthController extends Controller
         } else {
             $request->validate([
                 "origin_name" => "required",
+                "city_name" => "required",
             ]);
 
-            $origin = Origin::create(['name' => $request->origin_name, 'type' => 'SCHOOL']);
+            $origin = Origin::create(['name' => $request->origin_name, 'type' => 'SCHOOL', 'city' => $request->city_name]);
             $origin_id = $origin->id;
         }
 
@@ -138,10 +139,10 @@ class AuthController extends Controller
             ]);
         }
 
-        User::create(['name' => $request->name, 'username' => $request->username, 'password' => Hash::make($request->password), 'level' => 3, 'origin_id' => $origin_id, 'is_active' => null]);
+        User::create(['name' => $request->name, 'username' => $request->username, 'password' => Hash::make($request->password), 'level' => User::ROLE_COUNSELING_TEACHER, 'origin_id' => $origin_id, 'is_active' => null]);
 
-        Session::flash("success", "Registrasi berhasil");
-        return Inertia::location("/");
+        Session::flash("success", "Registrasi berhasil, menunggu verifikasi dari MGBK");
+        return Inertia::location("/auth/signin");
     }
 
     public function startQuizView(Request $request)
