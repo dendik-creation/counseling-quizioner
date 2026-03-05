@@ -11,12 +11,20 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import AVAILABLE_CITIES from "@/lib/available_cities";
 import { User } from "@/types/user";
 import { useForm } from "@inertiajs/react";
+import axios from "axios";
 import { CircleX, Loader, Pencil, Save } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 
-const AdminUserEdit = ({ user }: { user: User }) => {
+const AdminUserEdit = ({
+    user,
+    active_origin,
+}: {
+    user: User;
+    active_origin?: string;
+}) => {
     const {
         data,
         setData,
@@ -33,10 +41,40 @@ const AdminUserEdit = ({ user }: { user: User }) => {
         level: user.level || "",
         is_active:
             user.is_active == null ? "" : user.is_active ? "true" : "false",
+        mgbk_city: active_origin || "",
     });
+
+    const {
+        data: originByCity,
+        setData: setOriginByCity,
+        setDefaults: setDefaultsOriginByCity,
+    } = useForm({
+        origins: [] as string[],
+    });
+
+    useEffect(() => {
+        if (data.mgbk_city) {
+            handleFetchOriginByCity(data.mgbk_city);
+        }
+    }, []);
 
     const handleChangeInput = (key: keyof typeof data, value: string) => {
         setData(key, value);
+        if (key == "mgbk_city") {
+            handleFetchOriginByCity(value);
+        }
+    };
+
+    const handleFetchOriginByCity = async (city: string) => {
+        try {
+            setDefaultsOriginByCity();
+            const { data } = await axios.get(
+                `/admin/users/get-origin-by-city/${city}`,
+            );
+            setOriginByCity("origins", data.data);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const validateForm = (): boolean => {
@@ -52,6 +90,13 @@ const AdminUserEdit = ({ user }: { user: User }) => {
         }
         if (!data.level) {
             setError("level", "Role wajib dipilih");
+            isValid = false;
+        }
+        if (
+            data.level.toString() === "2" &&
+            (!data.mgbk_city || data.mgbk_city.trim() === "")
+        ) {
+            setError("mgbk_city", "Kota MGBK wajib diisi");
             isValid = false;
         }
         return isValid;
@@ -155,6 +200,32 @@ const AdminUserEdit = ({ user }: { user: User }) => {
                                 <ErrorInput error={errors.level} />
                             )}
                         </div>
+                        {data.level.toString() == "2" && (
+                            <div className="flex flex-col w-full">
+                                <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                    Pilih Kota Pantauan MGBK
+                                </label>
+                                <div className="">
+                                    <SelectSearchInput
+                                        placeholder="Pilih Kota"
+                                        options={AVAILABLE_CITIES}
+                                        value={data.mgbk_city || ""}
+                                        onChange={(value) =>
+                                            handleChangeInput(
+                                                "mgbk_city",
+                                                value.toString(),
+                                            )
+                                        }
+                                        removeValue={() =>
+                                            handleChangeInput("mgbk_city", "")
+                                        }
+                                    />
+                                </div>
+                                {errors.mgbk_city && (
+                                    <ErrorInput error={errors.mgbk_city} />
+                                )}
+                            </div>
+                        )}
                         <div className="flex flex-col w-full">
                             <label className="text-base mb-1">
                                 Status Aktif
@@ -185,6 +256,26 @@ const AdminUserEdit = ({ user }: { user: User }) => {
                                 />
                             </div>
                         </div>
+                        {data.level.toString() == "2" &&
+                            originByCity.origins.length > 0 && (
+                                <div className="flex flex-col w-full">
+                                    <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                        Instansi atau area yang di pantau
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {originByCity.origins.map(
+                                            (origin: any, index: number) => (
+                                                <div
+                                                    key={index}
+                                                    className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-medium border border-blue-100"
+                                                >
+                                                    {origin.name}
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                     </div>
                 </DialogHeader>
                 <DialogFooter className="mt-9">

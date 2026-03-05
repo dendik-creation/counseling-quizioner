@@ -9,6 +9,7 @@ class Origin extends Model
     protected $guarded = ["id"];
     protected $casts = [
         "mgbk_id" => "integer",
+        "city" => "string",
     ];
 
     public function mgbk()

@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->string("name");
             $table->string("type");
-            $table->string("city")->nullable();
+            $table->string("city");
             $table->timestamps();
         });
     }

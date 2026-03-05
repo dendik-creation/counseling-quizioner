@@ -23,9 +23,9 @@ class OriginController extends Controller
         ->where("mgbk_id", $user->id)
         ->paginate(config("custom.default.pagination"));
         return Inertia::render("Mgbk/Origin/Index", [
-            "title" => "Data Asal Partisipan",
+            "title" => "Data Asal",
             "description" =>
-                "Kelola informasi asal partisipan (institusi) dibawah naungan Anda",
+                "Kelola informasi asal (institusi) dibawah naungan Anda",
             "origins" => $origins,
             "search" => $search,
         ]);

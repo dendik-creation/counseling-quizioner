@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Participant;
 use App\Models\Origin;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -30,8 +29,14 @@ class ParticipantSeed extends Seeder
             "mgbk_id" => 3
         ]);
         Origin::create([
-            "name" => "Masyarakat Umum",
+            "name" => "Masyarakat Kudus",
             "type" => "COMMON",
+            "city" => "KUDUS"
+        ]);
+        Origin::create([
+            "name" => "Masyarakat Pati",
+            "type" => "COMMON",
+            "city" => "PATI"
         ]);
 
         // Teacher

@@ -13,6 +13,7 @@ export type User = {
     origin?: Origin;
     mgbk_id?: number;
     mgbk?: User;
+    mgbk_origins?: Origin[];
 };
 
 export type AdminUserIndexProps = PageTitleProps & {

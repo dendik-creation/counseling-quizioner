@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Origin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class UserController extends Controller
     {
         $search = $request->query("search");
         $level = $request->query("level");
-        $users = User::with("origin", "mgbk")->when($search, function ($query, $search) {
+        $users = User::with("origin", "mgbk", "mgbk_origins")->when($search, function ($query, $search) {
             return $query->where(function ($q) use ($search) {
                 $q->where("name", "like", "%" . $search . "%")->orWhere(
                     "username",
@@ -38,6 +39,14 @@ class UserController extends Controller
             "users" => $users,
             "search" => $search,
             "level" => $level,
+        ]);
+    }
+
+    public function getOriginByCity($city){
+        $origins = Origin::where("city", $city)->get();
+        return response()->json([
+            "message" => "Successfully get cities of origin",
+            "data" => $origins
         ]);
     }
 

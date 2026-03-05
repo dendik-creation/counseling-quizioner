@@ -32,6 +32,10 @@ class User extends Authenticatable
         return $this->belongsTo(Origin::class);
     }
 
+    public function mgbk_origins(){
+        return $this->hasMany(Origin::class, "mgbk_id", "id");
+    }
+
     public function mgbk()
     {
         return $this->belongsTo(User::class);

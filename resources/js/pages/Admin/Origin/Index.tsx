@@ -114,7 +114,7 @@ const AdminOriginIndex = ({
                                 <TableCell>
                                     {humanizeOriginType(origin.type)}
                                 </TableCell>
-                                <TableCell>{origin.city ?? "-"}</TableCell>
+                                <TableCell>{origin.city}</TableCell>
                                 <TableCell>
                                     {origin.mgbk?.name ?? "-"}
                                 </TableCell>

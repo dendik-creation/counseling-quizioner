@@ -28,9 +28,9 @@ class OriginController extends Controller
         })
         ->paginate(config("custom.default.pagination"));
         return Inertia::render("Admin/Origin/Index", [
-            "title" => "Data Asal Partisipan",
+            "title" => "Data Asal",
             "description" =>
-                "Kelola informasi asal partisipan ketika mengikuti kuisioner",
+                "Kelola informasi asal ketika mengikuti kuisioner",
             "origins" => $origins,
             "search" => $search,
             "available_mgbk" => $available_mgbk,
@@ -43,11 +43,11 @@ class OriginController extends Controller
             "name" => "required|max:255",
             "type" => "required|max:255",
             "mgbk_id" => "nullable",
-            "city" => "nullable",
+            "city" => "required",
         ]);
 
         Origin::create($validated);
-        Session::flash("success", "Asal partisipan berhasil ditambahkan.");
+        Session::flash("success", "Data asal berhasil ditambahkan.");
         return Inertia::location(route("admin.origins.index"));
     }
 
@@ -55,7 +55,7 @@ class OriginController extends Controller
     {
         $origin = Origin::findOrFail($id);
         if (!$origin) {
-            Session::flash("error", "Asal partisipan tidak ditemukan");
+            Session::flash("error", "Data asal tidak ditemukan");
             return Inertia::location(route("admin.origins.index"));
         }
 
@@ -63,11 +63,11 @@ class OriginController extends Controller
             "name" => "required|max:255",
             "type" => "required|max:255",
             "mgbk_id" => "nullable",
-            "city" => "nullable",
+            "city" => "required",
         ]);
 
         $origin->update($validated);
-        Session::flash("success", "Asal partisipan berhasil diperbarui.");
+        Session::flash("success", "Data asal berhasil diperbarui.");
         return Inertia::location(route("admin.origins.index"));
     }
 
@@ -75,12 +75,12 @@ class OriginController extends Controller
     {
         $origin = Origin::findOrFail($id);
         if (!$origin) {
-            Session::flash("error", "Asal partisipan tidak ditemukan");
+            Session::flash("error", "Data asal tidak ditemukan");
             return Inertia::location(route("admin.origins.index"));
         }
 
         $origin->delete();
-        Session::flash("success", "Asal partisipan berhasil dihapus.");
+        Session::flash("success", "Data asal berhasil dihapus.");
         return Inertia::location(route("admin.origins.index"));
     }
 }

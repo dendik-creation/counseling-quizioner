@@ -12,6 +12,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import AVAILABLE_CITIES from "@/lib/available_cities";
 import { SelectOption } from "@/types/global";
 import { Origin } from "@/types/origin";
 import { useForm } from "@inertiajs/react";
@@ -63,7 +64,7 @@ const AdminOriginEdit = ({
             setError("type", "Tipe asal wajib dipilih");
             isValid = false;
         }
-        if (data.type === "SCHOOL" && (!data.city || data.city.trim() === "")) {
+        if (!data.city || data.city.trim() === "") {
             setError("city", "Kota wajib diisi");
             isValid = false;
         }
@@ -148,29 +149,28 @@ const AdminOriginEdit = ({
                             </div>
                             {errors.type && <ErrorInput error={errors.type} />}
                         </div>
-                        {data.type === "SCHOOL" && (
-                            <div className="flex flex-col w-full">
-                                <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
-                                    Kota
-                                </label>
-                                <Input
-                                    type="text"
-                                    placeholder="Masukkan Kota"
-                                    className="w-full"
-                                    disabled={processing}
+                        <div className="flex flex-col w-full">
+                            <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">
+                                Kota
+                            </label>
+                            <div className="">
+                                <SelectSearchInput
+                                    placeholder="Pilih Kota"
+                                    options={AVAILABLE_CITIES}
                                     value={data.city || ""}
-                                    onChange={(e) =>
+                                    onChange={(value) =>
                                         handleChangeInput(
                                             "city",
-                                            e.target.value,
+                                            value.toString(),
                                         )
                                     }
+                                    removeValue={() =>
+                                        handleChangeInput("city", "")
+                                    }
                                 />
-                                {errors.city && (
-                                    <ErrorInput error={errors.city} />
-                                )}
                             </div>
-                        )}
+                            {errors.city && <ErrorInput error={errors.city} />}
+                        </div>
                         {data.type === "SCHOOL" && (
                             <div className="flex flex-col w-full">
                                 <label className="text-base mb-1 after:content-['*'] after:text-red-500 after:ml-1">

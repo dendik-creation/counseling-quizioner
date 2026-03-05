@@ -6,7 +6,7 @@ export type Origin = {
     name: string;
     type: string;
     mgbk_id?: number;
-    city?: string;
+    city: string;
     mgbk?: User; // as mgbk user
     participant_count?: number;
 };

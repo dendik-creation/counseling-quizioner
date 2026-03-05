@@ -83,9 +83,10 @@ Route::prefix('admin')
             ->name('admin.users.')
             ->group(function () {
                 Route::get('/', [AdminUserController::class, 'index'])->name('index');
+                Route::get('/get-origin-by-city/{city}', [AdminUserController::class, 'getOriginByCity'])->name('get-origin-by-city');
                 Route::post('/', [AdminUserController::class, 'store'])->name('store');
                 Route::put('/{id}', [AdminUserController::class, 'update'])->name('update');
-                Route::put('/{id}/reset-password', [AdminUserController::class, 'resetPassword'])->name('admin.users.reset-password');
+                Route::put('/{id}/reset-password', [AdminUserController::class, 'resetPassword'])->name('reset-password');
                 Route::delete('/{id}', [AdminUserController::class, 'destroy'])->name('destroy');
             });
         // Master participant origin
