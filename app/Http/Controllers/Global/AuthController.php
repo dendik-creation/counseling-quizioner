@@ -223,12 +223,6 @@ class AuthController extends Controller
             "work" => "nullable",
         ]);
 
-        if ($request->status_regis == 'existing') {
-            $request->validate([
-                "participant_id" => "required|exists:participants,id",
-            ]);
-        }
-
         $questionnaires = Questionnaire::where("access_token", session("token"))
             ->where("expires_at", ">=", now())
             ->first();
@@ -239,7 +233,24 @@ class AuthController extends Controller
             ]);
         }
 
-        $participant = Participant::create($data);
+        if ($request->status_regis == 'existing') {
+            $request->validate([
+                "participant_id" => "required|exists:participants,id",
+            ]);
+
+            $participant = Participant::where('id', $request->participant_id)->first();
+            if (!$participant) {
+                session()->forget(["answers", "participant_id", "token"]);
+                return back()->withErrors([
+                    "message" => "Participant tidak ditemukan",
+                ]);
+            }
+
+            $participant->update(['origin_id' => $data['origin_id'], 'unique_code' => $data['unique_code'], 'name' => $data['name'], 'work' => $data['work'], 'class' => $data['class']]);
+        } else {
+            $participant = Participant::create($data);
+        }
+
         session([
             "participant_id" => $participant->id,
             "questionnaires_id" => $questionnaires->id,
